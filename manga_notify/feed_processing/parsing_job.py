@@ -13,7 +13,7 @@ def run_background_parsing(db: database.DataBase, channel_factory: channel.Chann
     """
     logging.info('Run background parsing')
     feeds = db.feeds.get_all()
-    logging.info('Got {len(feeds)} feeds')
+    logging.info(f'Got {len(feeds)} feeds')
     processor = feed_processor.get_feed_processor()
     feed_subscription = subscription.FeedSubscription(db.users.get_all())
 
