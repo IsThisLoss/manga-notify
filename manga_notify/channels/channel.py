@@ -1,4 +1,5 @@
 import abc
+import typing
 
 
 class Message:
@@ -20,4 +21,10 @@ class Channel:
 
     @abc.abstractmethod
     def send(self, msg: Message):
+        pass
+
+
+class ChannelFactory:
+    @abc.abstractmethod
+    def get_channels(self, users: typing.List[str]) -> typing.List[Channel]:
         pass
