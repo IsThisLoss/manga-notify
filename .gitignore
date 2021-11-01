@@ -140,3 +140,4 @@ cython_debug/
 
 state.json
 db.sqlite
+data
