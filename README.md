@@ -9,7 +9,7 @@ Simple python bot, that notifies about new manga chapters through Telegram.
 To setup your own instance of this application
 
 - Install docker and docker-compose
-- Take docker compose form [docs/deploy](docs/deploy)
+- Take docker compose form [docker-compose.yaml](docs/deploy/docker-compose.yaml)
 - Put your Bot's token as environment variables `TG_TOKEN` (probably .env file)
 - And run `docker-compose up -d`
 

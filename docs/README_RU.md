@@ -7,7 +7,7 @@
 Чтобы запустить свой собственный экзампляр бота нужно
 
 - Установить docker и docker-compose
-- Взять docker-compose файл из [deploy](deploy)
+- Взять docker-compose файл из [docker-compose.yaml](deploy/docker-compose.yaml)
 - Положить токен бота в переменную окружения `TG_TOKEN` (возможно через файл .env)
 - Запустить `docker-compose up -d`
 
