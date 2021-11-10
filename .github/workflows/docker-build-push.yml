@@ -6,7 +6,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push-image:
@@ -16,6 +15,12 @@ jobs:
       packages: write
 
     steps:
+      - name: Lower case image name
+        run: |
+          echo "IMAGE_NAME=${REPO,,}" >>${GITHUB_ENV}
+        env:
+          REPO: ${{ github.repository }}
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
