@@ -4,8 +4,14 @@ beautifulsoup4==4.10.0
 cachetools==4.2.2
 certifi==2021.10.8
 charset-normalizer==2.0.7
+flake8==4.0.1
 idna==3.3
+mccabe==0.6.1
+mypy==0.910
+mypy-extensions==0.4.3
+pycodestyle==2.8.0
 pydantic==1.8.2
+pyflakes==2.4.0
 python-dotenv==0.19.1
 python-telegram-bot==13.7
 pytz==2021.3
@@ -13,7 +19,9 @@ pytz-deprecation-shim==0.1.0.post0
 requests==2.26.0
 six==1.16.0
 soupsieve==2.2.1
+toml==0.10.2
 tornado==6.1
+types-requests==2.26.1
 typing-extensions==3.10.0.2
 tzdata==2021.4
 tzlocal==4.0.1
