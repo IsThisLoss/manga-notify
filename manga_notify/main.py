@@ -35,7 +35,6 @@ def init(cfg: settings.Settings):
 
 
 def main():
-    """ very long string very long stringvery long stringvery long stringvery long stringvery long stringvery long stringvery long string"""
     cfg = settings.get_config()
     init(cfg)
     updater = telegram.ext.Updater(token=cfg.tg_token)
