@@ -1,0 +1,11 @@
+version: "2"
+services:
+  manga-notify:
+    image: ghcr.io/isthisloss/manga-notify:latest    
+    network_mode: host
+    environment:
+      - TG_TOKEN=${TG_TOKEN}
+      - PARSING_INTERVAL=15
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
