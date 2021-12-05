@@ -13,23 +13,23 @@ from . import tg_utils
 
 def _make_help():
     msg = (
-    "/help выводит это сообщение\n"
-    "/start регистрирует пользователя\n"
-    "/drivers возвращает список доступных драйверов\n"
-    "/subscribe [driver] [url] подписывает пользователя на обновления\n"
-    "driver - один из доступных драйверов см. /drivers\n"
-    "url - ссылка на feed для парсинга\n"
-    "/subscriptions возвращает список активных подписок\n"
-    "/unsubscribe [driver] [url] отписывает пользователя от обновлений\n"
-    "параметры аналогичные /subscribe\n"
+        "/help выводит это сообщение\n"
+        "/start регистрирует пользователя\n"
+        "/drivers возвращает список доступных драйверов\n"
+        "/subscribe [driver] [url] подписывает пользователя на обновления\n"
+        "driver - один из доступных драйверов см. /drivers\n"
+        "url - ссылка на feed для парсинга\n"
+        "/subscriptions возвращает список активных подписок\n"
+        "/unsubscribe [driver] [url] отписывает пользователя от обновлений\n"
+        "параметры аналогичные /subscribe\n"
     )
     return msg.strip()
 
 
 def _make_err(cmd: str):
     msg = (
-    "Не удалось распарсить аргументы,\n"
-    f"формат должен быть '/{cmd} [driver] [url]"
+        "Не удалось распарсить аргументы,\n"
+        f"формат должен быть '/{cmd} [driver] [url]"
     )
     return msg
 
@@ -40,7 +40,9 @@ class DriverUrl:
     url: str
 
 
-def _parse_driver_url(args: typing.Optional[typing.List[str]]) -> typing.Optional[DriverUrl]:
+def _parse_driver_url(
+    args: typing.Optional[typing.List[str]],
+) -> typing.Optional[DriverUrl]:
     if not args:
         return None
     if len(args) != 2:
@@ -107,7 +109,7 @@ def subscriptions(chat_id: str):
     db = get_database()
     user_subscription = subscription.UserSubscription(db)
     feeds = user_subscription.get_user_feeds(chat_id)
-    data = []        
+    data = []
     for feed in feeds:
         data.append(f'`{feed.get_driver()} {feed.get_url()}`')
     if not data:

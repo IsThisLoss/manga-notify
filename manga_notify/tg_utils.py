@@ -10,7 +10,10 @@ def simple_handler(fn: typing.Callable):
     Decorator that pass char_id to function
     and sends return value of function as text
     """
-    def wrapper(update: telegram.Update, context: telegram.ext.CallbackContext):
+    def wrapper(
+        update: telegram.Update,
+        context: telegram.ext.CallbackContext
+    ):
         if not update.effective_chat:
             logging.warn('Got empty effective_chat')
             return
@@ -30,7 +33,10 @@ def simple_params_handler(fn: typing.Callable):
     Decorator that pass char_id and args to function
     and sends return value of function as text
     """
-    def wrapper(update: telegram.Update, context: telegram.ext.CallbackContext):
+    def wrapper(
+        update: telegram.Update,
+        context: telegram.ext.CallbackContext,
+    ):
         if not update.effective_chat:
             logging.warn('Got empty effective_chat')
             return
@@ -61,4 +67,3 @@ class DispatcherBuilder:
 
     def build(self) -> telegram.ext.Dispatcher:
         return self._dispatcher
-

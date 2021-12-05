@@ -1,3 +1,4 @@
+# flake8: noqa: E402
 import logging
 
 
@@ -31,7 +32,7 @@ def init(cfg: settings.Settings):
     with open(cfg.db_init) as f:
         conn = sqlite3.connect(cfg.db_string)
         conn.executescript(f.read())
-    
+
 
 def main():
     cfg = settings.get_config()

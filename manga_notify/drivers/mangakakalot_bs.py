@@ -1,3 +1,4 @@
+import typing
 import requests
 import dataclasses
 
@@ -14,7 +15,7 @@ class MangakakalotMessage(channel.Message):
         self._link = link
 
     def serialize(self) -> str:
-        return f'Новый выпуск [{self._name}]({self._link})' 
+        return f'Новый выпуск [{self._name}]({self._link})'
 
 
 @dataclasses.dataclass(frozen=True, order=True)
@@ -46,7 +47,7 @@ class MangakakalotBs(driver.Driver):
 
         if parsed_items:
             feed_data.set_cursor(parsed_items[0].title)
-        messages = []
+        messages: typing.List[channel.Message] = []
         for item in reversed(parsed_items):
             messages.append(MangakakalotMessage(
                 item.title, item.link
@@ -55,11 +56,3 @@ class MangakakalotBs(driver.Driver):
             feed_data=feed_data,
             messages=messages,
         )
-
-
-if __name__ == '__main__':
-    data = feed_storage.FeedData(feed_storage.FeedDataImpl(id='', driver='', url='https://mangakakalot.com/manga/dw925284', cursor=''))
-    parser = MangakakalotBs()
-    msgs = parser.parse(data).messages
-    for msg in msgs:
-        print(msg.serialize())

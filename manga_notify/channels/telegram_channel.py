@@ -26,8 +26,11 @@ class TelegramChannelFactory(channel.ChannelFactory):
     def __init__(self, bot: telegram.Bot):
         self._bot = bot
 
-    def get_channels(self, users: typing.List[str]) -> typing.List[channel.Channel]:
-        result = []
+    def get_channels(
+        self,
+        users: typing.List[str],
+    ) -> typing.List[channel.Channel]:
+        result: typing.List[channel.Channel] = []
         for user in users:
             result.append(TelegramChannel(user, self._bot))
         return result

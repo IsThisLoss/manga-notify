@@ -33,7 +33,7 @@ class DataBase:
             self._connection.execute('BEGIN')
             yield
             self._connection.execute('COMMIT')
-        except:
+        except Exception:
             self._connection.execute('ROLLBACK')
             logging.warning('Rollback transaction')
             raise

@@ -1,4 +1,3 @@
-import dataclasses
 import sqlite3
 import typing
 

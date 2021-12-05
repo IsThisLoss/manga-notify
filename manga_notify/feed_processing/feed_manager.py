@@ -19,13 +19,21 @@ class FeedManager:
         self._db = db
         self._processor = feed_processor.get_feed_processor()
 
-    def find_or_create(self, driver: str, url: str) -> typing.Optional[feed_storage.FeedData]:
+    def find_or_create(
+        self,
+        driver: str,
+        url: str,
+    ) -> typing.Optional[feed_storage.FeedData]:
         feed = self._db.feeds.find(driver, url)
         if not feed:
             feed = self._create_feed(driver, url)
         return feed
 
-    def _create_feed(self, driver: str, url: str) -> typing.Optional[feed_storage.FeedData]:
+    def _create_feed(
+        self,
+        driver: str,
+        url: str,
+    ) -> typing.Optional[feed_storage.FeedData]:
         feed = None
         try:
             with self._db.transaction():
@@ -36,11 +44,17 @@ class FeedManager:
                 f'driver = {driver}, url = {url}'
             )
         return feed
-            
-    def _create_feed_impl(self, driver: str, url: str) -> typing.Optional[feed_storage.FeedData]:
+
+    def _create_feed_impl(
+        self,
+        driver: str,
+        url: str,
+    ) -> typing.Optional[feed_storage.FeedData]:
         feed = self._db.feeds.create(driver, url)
         if not feed:
             return None
         feed = self._processor.process(feed)
+        if not feed:
+            return None
         self._db.feeds.update(feed.get_id(), feed.get_cursor())
         return feed

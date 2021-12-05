@@ -1,3 +1,4 @@
+import typing
 import requests
 import dataclasses
 
@@ -8,7 +9,10 @@ from ..channels import channel
 from ..database import feed_storage
 
 
-UA = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:93.0) Gecko/20100101 Firefox/93.0'
+UA = (
+    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:93.0) '
+    'Gecko/20100101 Firefox/93.0'
+)
 
 
 class MangaseeMessage(channel.Message):
@@ -17,7 +21,7 @@ class MangaseeMessage(channel.Message):
         self._link = link
 
     def serialize(self) -> str:
-        return f'Новый выпуск [{self._name}]({self._link})' 
+        return f'Новый выпуск [{self._name}]({self._link})'
 
 
 @dataclasses.dataclass
@@ -53,7 +57,7 @@ class MangaseeRss(driver.Driver):
             parsed_items.append(item)
         if parsed_items:
             feed_data.set_cursor(parsed_items[0].title)
-        messages = []
+        messages: typing.List[channel.Message] = []
         for item in reversed(parsed_items):
             messages.append(MangaseeMessage(
                 item.title, item.link

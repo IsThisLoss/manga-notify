@@ -7,7 +7,10 @@ from ..channels import channel
 from ..database import database
 
 
-def run_background_parsing(db: database.DataBase, channel_factory: channel.ChannelFactory):
+def run_background_parsing(
+    db: database.DataBase,
+    channel_factory: channel.ChannelFactory,
+):
     """
     Запускает парсинг всех фидов
     """

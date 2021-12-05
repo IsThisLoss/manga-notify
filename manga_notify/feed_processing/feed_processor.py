@@ -38,10 +38,10 @@ class FeedProcessor:
     ):
         if not messages:
             return
-        for channel in channels: 
+        for current_channel in channels:
             # send only last message of feed
             try:
-                channel.send(messages[-1])
+                current_channel.send(messages[-1])
             except Exception:
                 logging.exception("Failed to send message to channel")
 
