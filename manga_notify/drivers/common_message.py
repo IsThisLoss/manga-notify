@@ -32,7 +32,10 @@ class ParsingItemMessage(channel.Message):
         return self._serialize_many(self._parsed_items)
 
 
-def split_on_chunks(parsed_items: typing.List[ParsingItem], chunk_size: int = DEFAULT_CHUNK_SIZE) -> typing.List[channel.Message]:
+def split_on_chunks(
+        parsed_items: typing.List[ParsingItem],
+        chunk_size: int = DEFAULT_CHUNK_SIZE,
+) -> typing.List[channel.Message]:
     # TODO add tests
     result: typing.List[channel.Message] = []
     chunk_size = min(chunk_size, len(parsed_items))
