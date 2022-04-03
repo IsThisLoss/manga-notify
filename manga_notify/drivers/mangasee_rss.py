@@ -1,10 +1,10 @@
 import typing
 import requests
-import dataclasses
 
 import xml.etree.ElementTree as ET
 
 from . import driver
+from . import common_message
 from ..channels import channel
 from ..database import feed_storage
 
@@ -15,29 +15,14 @@ UA = (
 )
 
 
-class MangaseeMessage(channel.Message):
-    def __init__(self, name, link):
-        self._name = name
-        self._link = link
-
-    def serialize(self) -> str:
-        return f'Новый выпуск [{self._name}]({self._link})'
-
-
-@dataclasses.dataclass
-class ParsingItem:
-    title: str
-    link: str
-
-
 def iter_items(items):
     for item in items:
         title = item.find('title').text
         link = item.find('link').text
         if not title:
             continue
-        yield ParsingItem(
-            title=title,
+        yield common_message.ParsingItem(
+            name=title,
             link=link,
         )
 
@@ -52,16 +37,14 @@ class MangaseeRss(driver.Driver):
         root = ET.fromstring(response.text)
         parsed_items = []
         for item in iter_items(root.findall('./channel/item')):
-            if item.title == feed_data.get_cursor():
+            if item.name == feed_data.get_cursor():
                 break
             parsed_items.append(item)
-        if parsed_items:
-            feed_data.set_cursor(parsed_items[0].title)
         messages: typing.List[channel.Message] = []
-        for item in reversed(parsed_items):
-            messages.append(MangaseeMessage(
-                item.title, item.link
-            ))
+        if parsed_items:
+            feed_data.set_cursor(parsed_items[0].name)
+            items = list(reversed(parsed_items))
+            messages = common_message.split_on_chunks(items)
         return driver.ParsingResult(
             feed_data=feed_data,
             messages=messages,

@@ -1,27 +1,12 @@
 import typing
 import requests
-import dataclasses
 
 from bs4 import BeautifulSoup
 
 from . import driver
+from . import common_message
 from ..channels import channel
 from ..database import feed_storage
-
-
-class MangakakalotMessage(channel.Message):
-    def __init__(self, name, link):
-        self._name = name
-        self._link = link
-
-    def serialize(self) -> str:
-        return f'Новый выпуск [{self._name}]({self._link})'
-
-
-@dataclasses.dataclass(frozen=True, order=True)
-class ParsingItem:
-    title: str
-    link: str
 
 
 class MangakakalotBs(driver.Driver):
@@ -40,18 +25,16 @@ class MangakakalotBs(driver.Driver):
             href = str(charpter.get('href'))
             if title == feed_data.get_cursor():
                 break
-            parsed_items.append(ParsingItem(
-                title=title,
+            parsed_items.append(common_message.ParsingItem(
+                name=title,
                 link=href,
             ))
 
-        if parsed_items:
-            feed_data.set_cursor(parsed_items[0].title)
         messages: typing.List[channel.Message] = []
-        for item in reversed(parsed_items):
-            messages.append(MangakakalotMessage(
-                item.title, item.link
-            ))
+        if parsed_items:
+            feed_data.set_cursor(parsed_items[0].name)
+            items = list(reversed(parsed_items))
+            messages = common_message.split_on_chunks(items)
         return driver.ParsingResult(
             feed_data=feed_data,
             messages=messages,

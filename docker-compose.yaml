@@ -1,12 +1,12 @@
-version: "2"
+version: "3.1"
 services:
   manga-notify:
     build: .
     container_name: manga-notify
     network_mode: host
     environment:
-      - TG_TOKEN=${TG_TOKEN}
-      - PARSING_INTERVAL=15
+      TG_TOKEN: "${TG_TOKEN}"
+      PARSING_INTERVAL: "${PARSING_INTERVAL:-15}"
     volumes:
       - ./data:/data
     restart: unless-stopped
