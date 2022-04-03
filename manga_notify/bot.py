@@ -20,7 +20,7 @@ def _make_help():
         "driver - один из доступных драйверов см. /drivers\n"
         "url - ссылка на feed для парсинга\n"
         "/subscriptions возвращает список активных подписок\n"
-        "/unsubscribe [driver] [url] отписывает пользователя от обновлений\n"
+        "/unsubscribe отписывает пользователя от обновлений\n"
         "параметры аналогичные /subscribe\n"
     )
     return msg.strip()
@@ -124,7 +124,7 @@ def make_dispatcher(updater: telegram.ext.Updater) -> telegram.ext.Dispatcher:
 
     builder.add_handler('help', help)
     builder.add_handler('start', start)
-    builder.add_handler('drivers', drivers)
+    # builder.add_handler('drivers', drivers)
     builder.add_params_handler('subscribe', subscribe)
     builder.add_params_handler('unsubscribe', unsubscribe)
     builder.add_handler('subscriptions', subscriptions)

@@ -5,6 +5,7 @@ import sqlite3
 
 from . import feed_storage
 from . import user_storage
+from . import user_pipeline
 
 
 class DataBase:
@@ -15,6 +16,7 @@ class DataBase:
         )
         self._users = user_storage.UserStorage(self._connection)
         self._feeds = feed_storage.FeedStorage(self._connection)
+        self._user_pipeline = user_pipeline_storage.UserPipelineStorage(self._connection)
 
     @property
     def users(self) -> user_storage.UserStorage:
@@ -23,6 +25,10 @@ class DataBase:
     @property
     def feeds(self) -> feed_storage.FeedStorage:
         return self._feeds
+
+    @property
+    def user_pipeline(self) -> user_pipeline_storage.UserPipelineStorage:
+        return self._user_pipeline
 
     def __del__(self):
         self._connection.close()
