@@ -1,132 +1,143 @@
-import dataclasses
-import typing
+from aiogram import Bot, Dispatcher, types
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import State, StatesGroup
 
-import telegram
-import telegram.ext
 
+from . import settings
 from .database import get_database
 from .drivers import driver_factory
 from .feed_processing import subscription
-
-from . import tg_utils
 
 
 def _make_help():
     msg = (
         "/help выводит это сообщение\n"
         "/start регистрирует пользователя\n"
-        "/drivers возвращает список доступных драйверов\n"
-        "/subscribe [driver] [url] подписывает пользователя на обновления\n"
-        "driver - один из доступных драйверов см. /drivers\n"
-        "url - ссылка на feed для парсинга\n"
+        "/subscribe подписывает пользователя на обновления\n"
         "/subscriptions возвращает список активных подписок\n"
-        "/unsubscribe [driver] [url] отписывает пользователя от обновлений\n"
-        "параметры аналогичные /subscribe\n"
+        "/unsubscribe отписывает пользователя от обновлений"
     )
     return msg.strip()
 
 
-def _make_err(cmd: str):
-    msg = (
-        "Не удалось распарсить аргументы,\n"
-        f"формат должен быть '/{cmd} [driver] [url]"
-    )
-    return msg
+bot = Bot(settings.get_config().tg_token)
+storage = MemoryStorage()
+dp = Dispatcher(bot, storage=storage)
 
 
-@dataclasses.dataclass(frozen=True)
-class DriverUrl:
-    driver: str
-    url: str
+@dp.message_handler(commands='start')
+async def start_handler(message: types.Message):
+    async with get_database() as db:
+        await db.users.register(str(message.from_id))
+        await message.reply('Вы успешно зарегистрированы!')
 
 
-def _parse_driver_url(
-    args: typing.Optional[typing.List[str]],
-) -> typing.Optional[DriverUrl]:
-    if not args:
-        return None
-    if len(args) != 2:
-        return None
-    driver, url = args
-    return DriverUrl(
-        driver=driver,
-        url=url,
-    )
+@dp.message_handler(state='*', commands='cancel')
+async def cancel_handler(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+    await state.finish()
+    await message.reply('Отменено')
 
 
-@tg_utils.simple_handler
-def help(_: str) -> str:
-    return _make_help()
+@dp.message_handler(commands='help')
+async def help_handler(message: types.Message):
+    await message.reply(_make_help())
 
 
-@tg_utils.simple_handler
-def start(chat_id: str) -> str:
-    db = get_database()
-    db.users.register(chat_id)
-    return 'Вы успешно зарегистрированы!'
-
-
-@tg_utils.simple_handler
-def drivers(_: str):
-    factory = driver_factory.DriverFactory()
-    drivers_list = []
-    for driver_type in sorted(factory.list()):
-        drivers_list.append(f'`{driver_type}`')
-    msg = '\n'.join(drivers_list)
-    return msg
-
-
-@tg_utils.simple_params_handler
-def subscribe(chat_id: str, args: typing.List[str]):
-    driver_url = _parse_driver_url(args)
-    if not driver_url:
-        return _make_err('subscribe')
-    driver = driver_url.driver
-    url = driver_url.url
-    db = get_database()
-    user_subscription = subscription.UserSubscription(db)
-    if user_subscription.subscribe(chat_id, driver, url):
-        return 'Вы успешно подписаны'
-    return 'Не удалось создать фид'
-
-
-@tg_utils.simple_params_handler
-def unsubscribe(chat_id: str, args: typing.List[str]):
-    driver_url = _parse_driver_url(args)
-    if not driver_url:
-        return _make_err('unsubscribe')
-    driver = driver_url.driver
-    url = driver_url.url
-    db = get_database()
-    user_subscription = subscription.UserSubscription(db)
-    if user_subscription.unsubscribe(chat_id, driver, url):
-        return 'Вы успешно отписаны'
-    return 'Не удалось найти фид'
-
-
-@tg_utils.simple_handler
-def subscriptions(chat_id: str):
-    db = get_database()
-    user_subscription = subscription.UserSubscription(db)
-    feeds = user_subscription.get_user_feeds(chat_id)
+@dp.message_handler(commands='subscriptions')
+async def subscriptions_handler(message: types.Message):
+    async with get_database() as db:
+        user_subscription = subscription.UserSubscription(db)
+        feeds = await user_subscription.get_user_feeds(str(message.from_id))
     data = []
     for feed in feeds:
-        data.append(f'`{feed.get_driver()} {feed.get_url()}`')
-    if not data:
-        return 'Нет активных подписок'
-    data_str = '\n'.join(sorted(data))
-    msg = f'Активные подписки:\n{data_str}'
-    return msg
+        data.append(f'`{feed.get_url()}`')
+    msg = 'Нет активных подписок'
+    if data:
+        data_str = '\n'.join(data)
+        msg = f'Активные подписки:\n{data_str}'
+    await message.reply(msg, types.ParseMode.MARKDOWN)
 
 
-def make_dispatcher(updater: telegram.ext.Updater) -> telegram.ext.Dispatcher:
-    builder = tg_utils.DispatcherBuilder(updater)
+class NewSubscription(StatesGroup):
+    url = State()
 
-    builder.add_handler('help', help)
-    builder.add_handler('start', start)
-    builder.add_handler('drivers', drivers)
-    builder.add_params_handler('subscribe', subscribe)
-    builder.add_params_handler('unsubscribe', unsubscribe)
-    builder.add_handler('subscriptions', subscriptions)
 
-    return builder.build()
+@dp.message_handler(commands='subscribe')
+async def subscribe_handler(message: types.Message):
+    await NewSubscription.url.set()
+    await message.reply('Введи ссылку на фид')
+
+
+@dp.message_handler(state=NewSubscription.url)
+async def url_state(message: types.Message, state: FSMContext):
+    factory = driver_factory.DriverFactory()
+    url = message.text.strip()
+    driver = factory.find_driver(url)
+    await state.finish()
+    if not driver:
+        await message.reply('Кажется я еще не умею обрабатывать такие ссылки')
+        return
+    async with get_database() as db:
+        user_subscription = subscription.UserSubscription(db)
+        is_subscribed = await user_subscription.subscribe(
+            str(message.from_id),
+            driver,
+            url,
+        )
+        if is_subscribed:
+            await message.reply('Вы успешно подписаны')
+            return
+        await message.reply('Не удалось создать фид')
+
+
+@dp.message_handler(commands='unsubscribe')
+async def unsubscribe_hander(message: types.Message):
+    chat_id = str(message.from_id)
+    async with get_database() as db:
+        user_subscription = subscription.UserSubscription(db)
+        feeds = await user_subscription.get_user_feeds(chat_id)
+
+    if not feeds:
+        await message.reply('Нет активных подписок')
+        return
+
+    keyboard_markup = types.InlineKeyboardMarkup(row_width=1)
+    for feed in feeds:
+        keyboard_markup.add(types.InlineKeyboardButton(
+            feed.get_url(),
+            callback_data=feed.get_url()
+        ))
+    await message.reply(
+        'Выбери фид от которого нужно отписаться',
+        reply_markup=keyboard_markup
+    )
+
+
+@dp.callback_query_handler(lambda _: True)
+async def unsubscribe_callback(callback_query: types.CallbackQuery):
+    factory = driver_factory.DriverFactory()
+    url = callback_query.data.strip()
+    driver = factory.find_driver(url)
+    user_id = callback_query.from_user.id
+
+    msg = 'Не удалось найти фид'
+    async with get_database() as db:
+        user_subscription = subscription.UserSubscription(db)
+        is_unsubscribed = False
+        if driver:
+            is_unsubscribed = await user_subscription.unsubscribe(
+                str(user_id),
+                driver,
+                url,
+            )
+        if is_unsubscribed:
+            msg = 'Вы успешно отписаны'
+    await callback_query.message.edit_text(
+        msg,
+        reply_markup=types.InlineKeyboardMarkup(),
+    )
+    await callback_query.answer('Готово')

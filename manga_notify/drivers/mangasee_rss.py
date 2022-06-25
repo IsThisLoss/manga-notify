@@ -28,6 +28,9 @@ def iter_items(items):
 
 
 class MangaseeRss(driver.Driver):
+    def is_match(self, url: str) -> bool:
+        return 'mangasee' in url
+
     def parse(self, feed_data: feed_storage.FeedData) -> driver.ParsingResult:
         headers = {
             'User-Agent': UA,

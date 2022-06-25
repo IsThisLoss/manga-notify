@@ -17,7 +17,7 @@ class FeedProcessor:
     def __init__(self, drivers: driver_factory.DriverFactory):
         self._drivers = drivers
 
-    def process(
+    async def process(
         self,
         feed: feed_storage.FeedData,
         channels: typing.Optional[typing.List[channel.Channel]] = None
@@ -27,11 +27,11 @@ class FeedProcessor:
         parsed = driver.parse(feed)
         logging.info(f'Parsed {len(parsed.messages)} messages')
         if channels:
-            self._send_to_channels(channels, parsed.messages)
+            await self._send_to_channels(channels, parsed.messages)
         logging.info('Flush')
         return parsed.feed_data
 
-    def _send_to_channels(
+    async def _send_to_channels(
             self,
             channels: typing.List[channel.Channel],
             messages: typing.List[channel.Message]
@@ -41,7 +41,7 @@ class FeedProcessor:
         for current_channel in channels:
             for message in messages:
                 try:
-                    current_channel.send(message)
+                    await current_channel.send(message)
                 except Exception:
                     logging.exception("Failed to send message to channel")
 

@@ -7,7 +7,7 @@ from ..channels import channel
 from ..database import database
 
 
-def run_background_parsing(
+async def run_background_parsing(
     db: database.DataBase,
     channel_factory: channel.ChannelFactory,
 ):
@@ -15,10 +15,10 @@ def run_background_parsing(
     Запускает парсинг всех фидов
     """
     logging.info('Run background parsing')
-    feeds = db.feeds.get_all()
+    feeds = await db.feeds.get_all()
     logging.info(f'Got {len(feeds)} feeds')
     processor = feed_processor.get_feed_processor()
-    feed_subscription = subscription.FeedSubscription(db.users.get_all())
+    feed_subscription = subscription.FeedSubscription(await db.users.get_all())
 
     for feed in feeds:
         subscribed_users = feed_subscription.get_subscribed_users(feed)
@@ -26,6 +26,6 @@ def run_background_parsing(
         if not channels:
             logging.info(f'Got no channels for feed {feed.get_id()}')
             continue
-        with db.transaction():
-            feed = processor.process(feed, channels)
-            db.feeds.update(feed.get_id(), feed.get_cursor())
+        async with db.transaction():
+            feed = await processor.process(feed, channels)
+            await db.feeds.update(feed.get_id(), feed.get_cursor())

@@ -10,7 +10,7 @@ from . import feed_manager
 
 class FeedSubscription:
     """
-    Gain users subscribed to specific channel
+    Gain users subscribed to specific feed
     """
     def __init__(self, users: typing.List[user_storage.UserInfo]):
         self._users = users
@@ -36,28 +36,28 @@ class UserSubscription:
     def __init__(self, db: database.DataBase):
         self._db = db
 
-    def get_user_feeds(
+    async def get_user_feeds(
         self,
         user_id: str,
     ) -> typing.List[feed_storage.FeedData]:
         result: typing.List[feed_storage.FeedData] = []
-        user_info = self._db.users.get_subscriptions(user_id)
+        user_info = await self._db.users.get_subscriptions(user_id)
         if not user_info:
             return result
         for feed_id in user_info.subscriptions:
-            feed = self._db.feeds.get(feed_id)
+            feed = await self._db.feeds.get(feed_id)
             if not feed:
                 continue
             result.append(feed)
         return result
 
-    def subscribe(self, user_id: str, driver: str, url: str) -> bool:
+    async def subscribe(self, user_id: str, driver: str, url: str) -> bool:
         feed_mgr = feed_manager.FeedManager(self._db)
-        feed = feed_mgr.find_or_create(driver, url)
+        feed = await feed_mgr.find_or_create(driver, url)
         if not feed:
             return False
         try:
-            self._db.users.subscribe(user_id, feed.get_id())
+            await self._db.users.subscribe(user_id, feed.get_id())
             return True
         except Exception:
             logging.exception(
@@ -65,12 +65,12 @@ class UserSubscription:
             )
         return False
 
-    def unsubscribe(self, user_id: str, driver: str, url: str) -> bool:
-        feed = self._db.feeds.find(driver, url)
+    async def unsubscribe(self, user_id: str, driver: str, url: str) -> bool:
+        feed = await self._db.feeds.find(driver, url)
         if not feed:
             return False
         try:
-            self._db.users.unsubscribe(user_id, feed.get_id())
+            await self._db.users.unsubscribe(user_id, feed.get_id())
             return True
         except Exception:
             logging.exception(
