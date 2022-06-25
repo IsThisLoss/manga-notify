@@ -20,7 +20,7 @@ class Channel:
     """
 
     @abc.abstractmethod
-    def send(self, msg: Message):
+    async def send(self, msg: Message):
         pass
 
 

@@ -26,5 +26,9 @@ class ParsingResult:
 
 class Driver:
     @abc.abstractmethod
+    def is_match(self, url: str) -> bool:
+        pass
+
+    @abc.abstractmethod
     def parse(self, feed_data: feed_storage.FeedData) -> ParsingResult:
         pass

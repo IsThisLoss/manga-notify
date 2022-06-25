@@ -10,6 +10,9 @@ from ..database import feed_storage
 
 
 class MangakakalotBs(driver.Driver):
+    def is_match(self, url: str) -> bool:
+        return 'mangakakalot' in url
+
     def parse(self, feed_data: feed_storage.FeedData) -> driver.ParsingResult:
 
         response = requests.get(feed_data.get_url())

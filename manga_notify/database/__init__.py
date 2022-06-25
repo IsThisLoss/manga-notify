@@ -1,7 +1,15 @@
+import contextlib
+
 from . import database
 from .. import settings
 
+import aiosqlite
 
-def get_database():
-    db_string = settings.get_config().db_string
-    return database.DataBase(db_string)
+
+@contextlib.asynccontextmanager
+async def get_database():
+    connection = await aiosqlite.connect(settings.get_config().db_string)
+    try:
+        yield database.DataBase(connection)
+    finally:
+        await connection.close()
