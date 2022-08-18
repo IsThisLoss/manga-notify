@@ -9,7 +9,11 @@ class Settings(pydantic.BaseSettings):
     db_init: str = './sql/init.sql'     # path to init sql script
     redis_host: str = 'localhost'       # redis host
     redis_port: int = 6379              # redis port
-    aiogram_fsm_prefix: 'str' = 'aiogram_fsm' # prefix for redis keys used by aiogram fsm
+
+    # prefix for redis
+    # keys used by aiogram fsm
+    aiogram_fsm_prefix: 'str' = 'aiogram_fsm'
+
     parsing_interval: int  # interval in minutes to run background parsing
 
     class Config:

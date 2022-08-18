@@ -23,7 +23,11 @@ def _make_help():
 
 cfg = settings.get_config()
 bot = Bot(cfg.tg_token)
-storage = RedisStorage2(host=cfg.redis_host, port=cfg.redis_port, prefix=cfg.aiogram_fsm_prefix)
+storage = RedisStorage2(
+    host=cfg.redis_host,
+    port=cfg.redis_port,
+    prefix=cfg.aiogram_fsm_prefix,
+)
 dp = Dispatcher(bot, storage=storage)
 
 
