@@ -141,3 +141,4 @@ cython_debug/
 state.json
 db.sqlite
 data
+redis-data
