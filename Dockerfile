@@ -1,13 +1,13 @@
 FROM python:3.8.10
 
-WORKDIR /usr/src/app
+RUN apt update && apt install -y supervisor sqlite
 
-COPY ./requirements.txt .
+# supervisord
+COPY supervisor/supervisord.conf /etc/supervisor/supervisord.conf
 
-RUN pip install --no-cache-dir -r requirements.txt
+COPY . ./var/build
 
-COPY ./sql ./sql
+RUN pip install /var/build
+RUN rm -rf /var/build
 
-COPY ./manga_notify ./manga_notify
-
-CMD ["python", "-m", "manga_notify.main"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

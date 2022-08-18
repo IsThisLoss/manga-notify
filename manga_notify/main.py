@@ -12,7 +12,6 @@ import os
 import asyncio
 
 from . import bot
-from . import background
 from . import settings
 
 import sqlite3
@@ -33,20 +32,10 @@ def init(cfg: settings.Settings):
         conn.executescript(f.read())
 
 
-async def bg_work():
-    while True:
-        await background.job()
-        await asyncio.sleep(settings.get_config().parsing_interval * 60)
-
-
 async def main():
     cfg = settings.get_config()
     init(cfg)
-    task = asyncio.create_task(bg_work())
-    try:
-        await bot.dp.start_polling()
-    finally:
-        task.cancel()
+    await bot.dp.start_polling()
 
 
 if __name__ == '__main__':
