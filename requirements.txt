@@ -1,8 +1,10 @@
 aiogram==2.21
 aiohttp==3.8.1
+aioredis==1.3.1
 aiosignal==1.2.0
 aiosqlite==0.17.0
 APScheduler==3.6.3
+arq==0.22
 async-timeout==4.0.2
 attrs==21.4.0
 Babel==2.9.1
@@ -11,8 +13,10 @@ beautifulsoup4==4.10.0
 cachetools==4.2.2
 certifi==2021.10.8
 charset-normalizer==2.0.7
+click==8.1.3
 flake8==4.0.1
 frozenlist==1.3.0
+hiredis==2.0.0
 idna==3.3
 mccabe==0.6.1
 multidict==6.0.2

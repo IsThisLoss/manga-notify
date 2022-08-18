@@ -1,5 +1,5 @@
 from aiogram import Bot, Dispatcher, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
@@ -21,8 +21,13 @@ def _make_help():
     return msg.strip()
 
 
-bot = Bot(settings.get_config().tg_token)
-storage = MemoryStorage()
+cfg = settings.get_config()
+bot = Bot(cfg.tg_token)
+storage = RedisStorage2(
+    host=cfg.redis_host,
+    port=cfg.redis_port,
+    prefix=cfg.aiogram_fsm_prefix,
+)
 dp = Dispatcher(bot, storage=storage)
 
 

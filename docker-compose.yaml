@@ -10,3 +10,10 @@ services:
     volumes:
       - ./data:/data
     restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    network_mode: host
+    restart: always
+    volumes:
+      - ./redis-data:/data
