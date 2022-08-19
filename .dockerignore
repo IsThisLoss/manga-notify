@@ -1,0 +1,7 @@
+data
+redis-data
+*.sqlite
+
+__pycache__
+
+.env
