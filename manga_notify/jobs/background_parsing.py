@@ -2,6 +2,7 @@ from ..feed_processing import parsing_job
 from ..database import get_database
 from ..channels import telegram_channel
 
+
 async def job(ctx: dict):
     """
     Запускается по расписанию

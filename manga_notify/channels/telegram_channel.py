@@ -15,7 +15,11 @@ class TelegramChannel(channel.Channel):
         self._redis = redis
 
     async def send(self, message: channel.Message):
-        await self._redis.enqueue_job('send_telegram_message', self._chat_id, message.serialize())
+        await self._redis.enqueue_job(
+            'send_telegram_message',
+            self._chat_id,
+            message.serialize(),
+        )
 
 
 class TelegramChannelFactory(channel.ChannelFactory):
