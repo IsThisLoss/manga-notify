@@ -30,5 +30,5 @@ class Driver:
         pass
 
     @abc.abstractmethod
-    def parse(self, feed_data: feed_storage.FeedData) -> ParsingResult:
+    async def parse(self, feed_data: feed_storage.FeedData) -> ParsingResult:
         pass

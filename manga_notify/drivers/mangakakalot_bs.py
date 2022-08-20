@@ -1,5 +1,5 @@
 import typing
-import requests
+import aiohttp
 
 from bs4 import BeautifulSoup
 
@@ -13,11 +13,16 @@ class MangakakalotBs(driver.Driver):
     def is_match(self, url: str) -> bool:
         return 'mangakakalot' in url
 
-    def parse(self, feed_data: feed_storage.FeedData) -> driver.ParsingResult:
+    async def parse(
+        self,
+        feed_data: feed_storage.FeedData,
+    ) -> driver.ParsingResult:
 
-        response = requests.get(feed_data.get_url())
+        async with aiohttp.ClientSession() as client:
+            async with client.get(feed_data.get_url()) as response:
+                data = await response.text()
 
-        soup = BeautifulSoup(response.text, 'html.parser')
+        soup = BeautifulSoup(data, 'html.parser')
         chapter_list = soup.find('div', class_='chapter-list')
         if not chapter_list:
             raise Exception("No chapters")
