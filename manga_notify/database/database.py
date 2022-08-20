@@ -1,12 +1,13 @@
 import contextlib
-import logging
+
+import asyncpg
 
 from . import feed_storage
 from . import user_storage
 
 
 class DataBase:
-    def __init__(self, connection):
+    def __init__(self, connection: asyncpg.Connection):
         self._connection = connection
         self._users = user_storage.UserStorage(self._connection)
         self._feeds = feed_storage.FeedStorage(self._connection)
@@ -21,11 +22,5 @@ class DataBase:
 
     @contextlib.asynccontextmanager
     async def transaction(self):
-        try:
-            await self._connection.execute('BEGIN')
+        async with self._connection.transaction():
             yield
-            await self._connection.execute('COMMIT')
-        except Exception:
-            self._connection.execute('ROLLBACK')
-            logging.warning('Rollback transaction')
-            raise

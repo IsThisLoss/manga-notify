@@ -1,6 +1,6 @@
 import typing
 
-import aiosqlite
+import asyncpg
 
 
 class FeedData:
@@ -27,18 +27,18 @@ class FeedData:
 
 
 class FeedStorage:
-    def __init__(self, conn: aiosqlite.Connection):
+    def __init__(self, conn: asyncpg.Connection):
         self._connection = conn
 
     async def get_all(self) -> typing.List[FeedData]:
-        rows = await self._connection.execute("""
+        rows = await self._connection.fetch("""
             SELECT
                 id, driver, url, cursor
             FROM
                 feeds
         """)
         result = []
-        async for id, driver, url, cursor in rows:
+        for id, driver, url, cursor in rows:
             data = FeedData(
                 id=id,
                 driver=driver,
@@ -49,16 +49,15 @@ class FeedStorage:
         return result
 
     async def get(self, id: int) -> typing.Optional[FeedData]:
-        cur = await self._connection.execute("""
+        row = await self._connection.fetchrow("""
             SELECT
                 id, driver, url, cursor
             FROM
                 feeds
             WHERE
-                id = ?
+                id = $1
             LIMIT 1
-        """, (id,))
-        row = await cur.fetchone()
+        """, id)
         if not row:
             return None
         return FeedData(
@@ -69,7 +68,7 @@ class FeedStorage:
         )
 
     async def find(self, driver: str, url: str) -> typing.Optional[FeedData]:
-        cur = await self._connection.execute("""
+        row = await self._connection.fetchrow("""
             SELECT
                 id,
                 driver,
@@ -78,10 +77,9 @@ class FeedStorage:
             FROM
                 feeds
             WHERE
-                driver = ? AND url = ?
+                driver = $1 AND url = $2
             LIMIT 1
-        """, (driver, url))
-        row = await cur.fetchone()
+        """, driver, url)
         if not row:
             return None
         id, driver, url, cursor = row
@@ -93,13 +91,13 @@ class FeedStorage:
         )
 
     async def create(self, driver: str, url: str) -> typing.Optional[FeedData]:
-        cur = await self._connection.execute("""
+        id = await self._connection.fetchval("""
             INSERT INTO
                 feeds(driver, url)
             VALUES
-                (?, ?)
-        """, (driver, url))
-        id = cur.lastrowid
+                ($1, $2)
+            RETURNING id
+        """, driver, url)
         if not id:
             return None
         return FeedData(
@@ -114,7 +112,7 @@ class FeedStorage:
             UPDATE
                 feeds
             SET
-                cursor = ?
+                cursor = $1
             WHERE
-                id = ?
-        """, (cursor, id))
+                id = $2
+        """, cursor, id)

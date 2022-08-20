@@ -3,7 +3,7 @@ import dataclasses
 import logging
 import typing
 
-import aiosqlite
+import asyncpg
 
 
 @dataclasses.dataclass(frozen=True)
@@ -13,12 +13,12 @@ class UserInfo:
 
 
 class UserStorage:
-    def __init__(self, conn: aiosqlite.Connection):
+    def __init__(self, conn: asyncpg.Connection):
         self._connection = conn
 
-    async def _exec(self, query, args=None) -> bool:
+    async def _exec(self, query, *args) -> bool:
         try:
-            await self._connection.execute(query, args or [])
+            await self._connection.execute(query, *args)
             return True
         except Exception:
             logging.exception("Failed to exequte query")
@@ -28,30 +28,30 @@ class UserStorage:
         return await self._exec("""
             INSERT INTO
                 users (id)
-            VALUES (?)
+            VALUES ($1)
             ON CONFLICT (id) DO NOTHING
-        """, (user_id,))
+        """, user_id)
 
     async def subscribe(self, user_id: str, feed_id: int):
         await self._exec("""
             INSERT INTO
                 subscriptions (user_id, feed_id)
-            VALUES (?, ?)
+            VALUES ($1, $2)
             ON CONFLICT (user_id, feed_id) DO NOTHING
-        """, (user_id, feed_id))
+        """, user_id, feed_id)
 
     async def unsubscribe(self, user_id: str, feed_id: int):
         await self._exec("""
             DELETE FROM
                 subscriptions
             WHERE
-                user_id = ?
+                user_id = $1
                 AND
-                feed_id = ?
-        """, (user_id, feed_id))
+                feed_id = $2
+        """, user_id, feed_id)
 
     async def get_subscriptions(self, user_id: str) -> UserInfo:
-        cur = await self._connection.execute("""
+        rows = await self._connection.fetch("""
             SELECT
                 subscriptions.feed_id as feed_id
             FROM
@@ -60,9 +60,8 @@ class UserStorage:
                 subscriptions
                 ON users.id = subscriptions.user_id
             WHERE
-                users.id = ?
-        """, (user_id,))
-        rows = await cur.fetchall()
+                users.id = $1
+        """, user_id)
         feed_ids = set()
         for feed_id in rows:
             feed_ids.add(int(feed_id[0]))
@@ -72,7 +71,7 @@ class UserStorage:
         )
 
     async def get_all(self) -> typing.List[UserInfo]:
-        cur = await self._connection.execute("""
+        rows = await self._connection.fetch("""
             SELECT
                 users.id as user_id,
                 subscriptions.feed_id as feed_id
@@ -82,7 +81,6 @@ class UserStorage:
                 subscriptions
                 ON users.id = subscriptions.user_id
         """)
-        rows = await cur.fetchall()
         user_to_subscription = collections.defaultdict(set)
         for user_id, feed_id in rows:
             user_to_subscription[user_id].add(int(feed_id))
