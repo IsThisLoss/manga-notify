@@ -142,3 +142,5 @@ state.json
 db.sqlite
 data
 redis-data
+pg-data
+volumes

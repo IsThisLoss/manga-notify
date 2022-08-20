@@ -7,8 +7,6 @@ services:
     environment:
       TG_TOKEN: "${TG_TOKEN}"
       PARSING_INTERVAL: "${PARSING_INTERVAL:-15}"
-    volumes:
-      - ./data:/data
     restart: unless-stopped
 
   redis:
@@ -16,4 +14,16 @@ services:
     network_mode: host
     restart: always
     volumes:
-      - ./redis-data:/data
+      - ./volumes/redis:/data
+
+  postgres:
+    image: postgres:14
+    network_mode: host
+    restart: always
+    environment:
+      POSTGRES_USER: manga_notify
+      POSTGRES_DB: manga_notify
+      POSTGRES_PASSWORD: manga_notify
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql/data/pgdata

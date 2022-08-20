@@ -1,5 +1,7 @@
+volumes
 data
 redis-data
+pg-data
 *.sqlite
 
 __pycache__
