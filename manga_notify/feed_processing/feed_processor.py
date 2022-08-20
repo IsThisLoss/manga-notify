@@ -24,7 +24,7 @@ class FeedProcessor:
     ) -> feed_storage.FeedData:
         logging.info(f'Going to parse feed_id = {feed.get_id()}')
         driver = self._drivers.get(feed.get_driver())
-        parsed = driver.parse(feed)
+        parsed = await driver.parse(feed)
         logging.info(f'Parsed {len(parsed.messages)} messages')
         if channels:
             await self._send_to_channels(channels, parsed.messages)

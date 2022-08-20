@@ -1,5 +1,5 @@
 import typing
-import requests
+import aiohttp
 
 import xml.etree.ElementTree as ET
 
@@ -31,13 +31,22 @@ class MangaseeRss(driver.Driver):
     def is_match(self, url: str) -> bool:
         return 'mangasee' in url
 
-    def parse(self, feed_data: feed_storage.FeedData) -> driver.ParsingResult:
+    async def parse(
+        self,
+        feed_data: feed_storage.FeedData,
+    ) -> driver.ParsingResult:
         headers = {
             'User-Agent': UA,
         }
 
-        response = requests.get(feed_data.get_url(), headers=headers)
-        root = ET.fromstring(response.text)
+        async with aiohttp.ClientSession() as client:
+            async with client.get(
+                feed_data.get_url(),
+                headers=headers,
+            ) as response:
+                data = await response.text()
+
+        root = ET.fromstring(data)
         parsed_items = []
         for item in iter_items(root.findall('./channel/item')):
             if item.name == feed_data.get_cursor():
