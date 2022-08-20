@@ -4,6 +4,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from . import auth
+from . import callback_data
 from .. import settings
 from ..database import get_database
 from ..drivers import driver_factory
@@ -116,9 +117,13 @@ async def unsubscribe_hander(message: types.Message):
 
     keyboard_markup = types.InlineKeyboardMarkup(row_width=1)
     for feed in feeds:
+        data = callback_data.CallbackData(
+            method='unsubscribe',
+            payload={'url': feed.get_url()},
+        )
         keyboard_markup.add(types.InlineKeyboardButton(
             feed.get_url(),
-            callback_data=feed.get_url()
+            callback_data=data.serialize(),
         ))
     await message.reply(
         'Выбери фид от которого нужно отписаться',
@@ -126,10 +131,10 @@ async def unsubscribe_hander(message: types.Message):
     )
 
 
-@dp.callback_query_handler(lambda _: True)
+@dp.callback_query_handler(callback_data.create_matcher('unsubscribe'))
 async def unsubscribe_callback(callback_query: types.CallbackQuery):
     factory = driver_factory.DriverFactory()
-    url = callback_query.data.strip()
+    url = callback_data.parse(callback_query.data).payload['url']
     driver = factory.find_driver(url)
     user_id = callback_query.from_user.id
 
