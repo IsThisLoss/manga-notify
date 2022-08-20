@@ -3,11 +3,11 @@ from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-
-from . import settings
-from .database import get_database
-from .drivers import driver_factory
-from .feed_processing import subscription
+from . import auth
+from .. import settings
+from ..database import get_database
+from ..drivers import driver_factory
+from ..feed_processing import subscription
 
 
 def _make_help():
@@ -29,13 +29,17 @@ storage = RedisStorage2(
     prefix=cfg.aiogram_fsm_prefix,
 )
 dp = Dispatcher(bot, storage=storage)
+dp.middleware.setup(auth.AuthMiddleware())
 
 
 @dp.message_handler(commands='start')
 async def start_handler(message: types.Message):
     async with get_database() as db:
-        await db.users.register(str(message.from_id))
-        await message.reply('Вы успешно зарегистрированы!')
+        await db.users.register(
+            str(message.from_id),
+            str(message.from_user.username),
+        )
+    await message.reply('Вы успешно зарегистрированы!')
 
 
 @dp.message_handler(state='*', commands='cancel')
