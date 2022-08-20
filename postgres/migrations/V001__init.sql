@@ -6,7 +6,8 @@ CREATE TABLE feeds (
 );
 
 CREATE TABLE users (
-  id TEXT PRIMARY KEY
+  id TEXT PRIMARY KEY,
+  login TEXT NOT NULL
 );
 
 CREATE TABLE subscriptions (

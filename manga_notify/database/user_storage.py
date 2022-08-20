@@ -24,13 +24,24 @@ class UserStorage:
             logging.exception("Failed to exequte query")
         return False
 
-    async def register(self, user_id: str):
-        return await self._exec("""
-            INSERT INTO
-                users (id)
-            VALUES ($1)
-            ON CONFLICT (id) DO NOTHING
+    async def exists(self, user_id: str) -> bool:
+        """
+        return true if gived user_id was found in database
+        """
+        val = await self._connection.fetchval("""
+            SELECT EXISTS(SELECT id FROM users WHERE id = $1)
         """, user_id)
+        return bool(val)
+
+    async def register(self, user_id: str, login: str):
+        return await self._exec("""
+            INSERT INTO users (
+                id,
+                login
+            )
+            VALUES ($1, $2)
+            ON CONFLICT (id) DO NOTHING
+        """, user_id, login)
 
     async def subscribe(self, user_id: str, feed_id: int):
         await self._exec("""
