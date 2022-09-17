@@ -1,8 +1,23 @@
+import base64
 import dataclasses
 import json
 import typing
+import functools
 
 from aiogram import types
+
+
+def _encode(data: str) -> str:
+    return base64.b64encode(data.encode()).decode()
+
+
+def _decode(raw: str) -> str:
+    return base64.b64decode(raw.encode()).decode()
+
+
+class Methods:
+    UNSUBSCRIBE = 'unsubscribe'
+    LATER = 'LATER'
 
 
 @dataclasses.dataclass
@@ -10,27 +25,33 @@ class CallbackData:
     method: str
     payload: dict
 
-
     def serialize(self) -> str:
-        return f'{self.method}\n{json.dumps(self.payload)}'
+        return _encode(f'{self.method}\n{json.dumps(self.payload)}')
 
 
-def _parse_method(raw: str) -> typing.Optional[str]:
-    pos = raw.find('\n')
+# FIXME: Cache parsed data because
+# we have to parse is twice.
+# To match callback and inside callback
+@functools.lru_cache(maxsize=10)
+def parse(raw: str) -> typing.Optional[CallbackData]:
+    decoded = _decode(raw)
+    pos = decoded.find('\n')
     if not pos:
         return None
-    return raw[:pos]
+    method = decoded[:pos]
+    payload = json.loads(decoded[pos+1:])
+    return CallbackData(
+        method=method,
+        payload=payload,
+    )
 
 
-def create_matcher(target: str) -> typing.Callable[[types.CallbackQuery], bool]:
+def create_matcher(
+    target: str,
+) -> typing.Callable[[types.CallbackQuery], bool]:
     def matcher(callback_query: types.CallbackQuery) -> bool:
-        method = _parse_method(callback_query.data)
-        return method == target
+        data = parse(callback_query.data)
+        if not data:
+            return False
+        return data.method == target
     return matcher
-
-
-def parse(raw: str) -> CallbackData:
-    pos = raw.find('\n')
-    if not pos:
-        raise ValueError(f"Callback data has wrong format: {raw}")
-    return json.loads(raw[pos+1:])
