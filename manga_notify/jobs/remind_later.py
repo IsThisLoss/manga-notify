@@ -1,16 +1,9 @@
-from aiogram import Bot
-
-from .. import settings
+from .. import dependencies
 
 
-# FIXME: import bot from ..bot
-# create more objects than we need here,
-# so create new bot
-cfg = settings.get_config()
-bot = Bot(cfg.tg_token)
-
-
-async def job(_, user_id: str, message_id: int):
+async def job(ctx, user_id: str, message_id: int):
+    deps: dependencies.Dependencies = ctx['deps']
+    bot = deps.get_bot()
     await bot.send_message(
         user_id,
         'Напоминаю',

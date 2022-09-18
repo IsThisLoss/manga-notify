@@ -4,16 +4,16 @@ from . import background_parsing
 from . import send_telegram_message
 from . import remind_later
 
-from .. import settings
+from .. import dependencies
 
 
 async def run():
-    cfg = settings.get_config()
+    deps = dependencies.get()
+    cfg = deps.get_cfg()
+    redis = await deps.get_queues()
 
-    redis_settings = arq.connections.RedisSettings(
-        host=cfg.redis_host,
-        port=cfg.redis_port,
-    )
+    async def on_startup(ctx):
+        ctx['deps'] = deps
 
     worker = arq.worker.Worker(
         functions=[
@@ -31,6 +31,7 @@ async def run():
                 microsecond=cfg.parsing_interval * 60000,
             )
         ],
-        redis_settings=redis_settings,
+        redis_pool=redis,
+        on_startup=on_startup,
     )
     await worker.async_run()

@@ -4,7 +4,7 @@ from aiogram import types
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.dispatcher.middlewares import BaseMiddleware
 
-from ..database import get_database
+from .. import dependencies
 
 
 class AuthMiddleware(BaseMiddleware):
@@ -12,8 +12,10 @@ class AuthMiddleware(BaseMiddleware):
         if message.get_command() == '/start':
             return
 
+        deps = dependencies.get()
+
         user_id = str(message.from_id)
-        async with get_database() as db:
+        async with deps.get_db() as db:
             if await db.users.exists(user_id):
                 return
 
