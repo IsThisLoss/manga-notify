@@ -15,7 +15,7 @@ _TOMORROW_EVENING = 'TE'
 _SATURDAY_MORNING = 'SM'
 
 
-def build_keyboard() -> types.InlineKeyboardMarkup:
+def build_remind_keyboard() -> types.InlineKeyboardMarkup:
     keyboard_markup = types.InlineKeyboardMarkup(row_width=1)
     method = callback_data.Methods.LATER
     buttons = (

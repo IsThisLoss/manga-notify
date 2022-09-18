@@ -162,7 +162,7 @@ async def unsubscribe_callback(callback_query: types.CallbackQuery):
 
 
 @dp.callback_query_handler(
-    callback_data.create_matcher(callback_data.Methods.LATER),
+    callback_data.create_matcher(callback_data.Methods.LATER)
 )
 async def later_callback(callback_query: types.CallbackQuery):
     data = callback_data.parse(callback_query.data)
@@ -173,6 +173,6 @@ async def later_callback(callback_query: types.CallbackQuery):
     user_id = str(callback_query.from_user.id)
     message_id = callback_query.message.message_id
 
-    remind_later.button_callback(user_id, message_id, data)
+    await remind_later.button_callback(user_id, message_id, data)
 
     await callback_query.answer('Готово')

@@ -18,6 +18,7 @@ def _decode(raw: str) -> str:
 class Methods:
     UNSUBSCRIBE = 'unsubscribe'
     LATER = 'LATER'
+    LATER_TIME = 'LATER_TIME'
 
 
 @dataclasses.dataclass
