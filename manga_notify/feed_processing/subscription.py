@@ -65,15 +65,12 @@ class UserSubscription:
             )
         return False
 
-    async def unsubscribe(self, user_id: str, driver: str, url: str) -> bool:
-        feed = await self._db.feeds.find(driver, url)
-        if not feed:
-            return False
+    async def unsubscribe(self, user_id: str, feed_id: int) -> bool:
         try:
-            await self._db.users.unsubscribe(user_id, feed.get_id())
+            await self._db.users.unsubscribe(user_id, feed_id)
             return True
         except Exception:
             logging.exception(
-                f'Cannot unsubscribe user {user_id} from feed {feed.get_id()}'
+                f'Cannot unsubscribe user {user_id} from feed {feed_id}'
             )
         return False

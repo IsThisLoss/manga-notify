@@ -2,6 +2,7 @@ import arq
 
 from . import background_parsing
 from . import send_telegram_message
+from . import remind_later
 
 from .. import settings
 
@@ -18,6 +19,9 @@ async def run():
         functions=[
             arq.worker.func(
                 send_telegram_message.job, name='send_telegram_message'
+            ),
+            arq.worker.func(
+                remind_later.job, name='remind_later'
             ),
         ],
         cron_jobs=[
