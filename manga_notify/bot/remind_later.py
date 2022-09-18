@@ -2,10 +2,9 @@ from datetime import datetime, timedelta
 import typing
 
 from aiogram import types
-import arq
 
 from . import callback_data
-from .. import settings
+from .. import dependencies
 
 
 # NOTE: Telegram API has max size of callback data
@@ -61,16 +60,8 @@ def _get_queue_time(now: datetime, when: str) -> typing.Optional[datetime]:
     return None
 
 
-async def get_redis():
-    cfg = settings.get_config()
-    redis_settings = arq.connections.RedisSettings(
-        host=cfg.redis_host,
-        port=cfg.redis_port,
-    )
-    return await arq.create_pool(redis_settings)
-
-
 async def button_callback(
+    deps: dependencies.Dependencies,
     user_id: str,
     message_id: int,
     data: callback_data.CallbackData,
@@ -79,8 +70,8 @@ async def button_callback(
     until = _get_queue_time(now, data.payload['when'])
     if not until:
         return False
-    redis = await get_redis()
-    await redis.enqueue_job(
+    queues = await deps.get_queues()
+    await queues.enqueue_job(
         'remind_later',
         user_id,
         message_id,

@@ -1,4 +1,4 @@
-from aiogram import Bot, Dispatcher, types
+from aiogram import Dispatcher, types
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -6,8 +6,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from . import auth
 from . import callback_data
 from . import remind_later
-from .. import settings
-from ..database import get_database
+from .. import dependencies
 from ..drivers import driver_factory
 from ..feed_processing import subscription
 
@@ -23,20 +22,19 @@ def _make_help():
     return msg.strip()
 
 
-cfg = settings.get_config()
-bot = Bot(cfg.tg_token)
+deps = dependencies.get()
 storage = RedisStorage2(
-    host=cfg.redis_host,
-    port=cfg.redis_port,
-    prefix=cfg.aiogram_fsm_prefix,
+    host=deps.get_cfg().redis_host,
+    port=deps.get_cfg().redis_port,
+    prefix=deps.get_cfg().aiogram_fsm_prefix,
 )
-dp = Dispatcher(bot, storage=storage)
+dp = Dispatcher(deps.get_bot(), storage=storage)
 dp.middleware.setup(auth.AuthMiddleware())
 
 
 @dp.message_handler(commands='start')
 async def start_handler(message: types.Message):
-    async with get_database() as db:
+    async with deps.get_db() as db:
         await db.users.register(
             str(message.from_id),
             str(message.from_user.username),
@@ -60,7 +58,7 @@ async def help_handler(message: types.Message):
 
 @dp.message_handler(commands='subscriptions')
 async def subscriptions_handler(message: types.Message):
-    async with get_database() as db:
+    async with deps.get_db() as db:
         user_subscription = subscription.UserSubscription(db)
         feeds = await user_subscription.get_user_feeds(str(message.from_id))
     data = []
@@ -92,7 +90,7 @@ async def url_state(message: types.Message, state: FSMContext):
     if not driver:
         await message.reply('Кажется я еще не умею обрабатывать такие ссылки')
         return
-    async with get_database() as db:
+    async with deps.get_db() as db:
         user_subscription = subscription.UserSubscription(db)
         is_subscribed = await user_subscription.subscribe(
             str(message.from_id),
@@ -108,7 +106,7 @@ async def url_state(message: types.Message, state: FSMContext):
 @dp.message_handler(commands='unsubscribe')
 async def unsubscribe_hander(message: types.Message):
     chat_id = str(message.from_id)
-    async with get_database() as db:
+    async with deps.get_db() as db:
         user_subscription = subscription.UserSubscription(db)
         feeds = await user_subscription.get_user_feeds(chat_id)
 
@@ -146,7 +144,7 @@ async def unsubscribe_callback(callback_query: types.CallbackQuery):
     user_id = str(callback_query.from_user.id)
 
     msg = 'Не удалось найти фид'
-    async with get_database() as db:
+    async with deps.get_db() as db:
         user_subscription = subscription.UserSubscription(db)
         is_unsubscribed = await user_subscription.unsubscribe(
             user_id,
@@ -173,6 +171,6 @@ async def later_callback(callback_query: types.CallbackQuery):
     user_id = str(callback_query.from_user.id)
     message_id = callback_query.message.message_id
 
-    await remind_later.button_callback(user_id, message_id, data)
+    await remind_later.button_callback(deps, user_id, message_id, data)
 
     await callback_query.answer('Готово')
