@@ -30,4 +30,4 @@ class DriverFactory:
             return mangasee_rss.MangaseeRss()
         if driver_type == driver.DriverType.MangakakalotBs:
             return mangakakalot_bs.MangakakalotBs()
-        raise ValueError(f"Unknow driver {driver_type}")
+        raise ValueError(f"Unknown driver {driver_type}")
