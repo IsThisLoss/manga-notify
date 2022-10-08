@@ -25,7 +25,7 @@ async def main():
     elif args.mode == 'jobs':
         await jobs.run()
     else:
-        logging.fatal(f'Unknow mode: {args.mode}')
+        logging.fatal(f'Unknown mode: {args.mode}')
         exit(1)
 
 

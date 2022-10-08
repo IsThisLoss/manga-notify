@@ -21,7 +21,7 @@ class UserStorage:
             await self._connection.execute(query, *args)
             return True
         except Exception:
-            logging.exception("Failed to exequte query")
+            logging.exception("Failed to execute query")
         return False
 
     async def exists(self, user_id: str) -> bool:
