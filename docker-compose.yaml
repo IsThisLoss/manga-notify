@@ -27,3 +27,4 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - ./volumes/postgres:/var/lib/postgresql/data/pgdata
+      - ./postgres/migrations:/docker-entrypoint-initdb.d
