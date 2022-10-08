@@ -88,7 +88,7 @@ async def url_state(message: types.Message, state: FSMContext):
     driver = factory.find_driver(url)
     await state.finish()
     if not driver:
-        await message.reply('Кажется я еще не умею обрабатывать такие ссылки')
+        await message.reply('Кажется, я еще не умею обрабатывать такие ссылки')
         return
     async with deps.get_db() as db:
         user_subscription = subscription.UserSubscription(db)
