@@ -35,11 +35,15 @@ dp.middleware.setup(auth.AuthMiddleware())
 @dp.message_handler(commands='start')
 async def start_handler(message: types.Message):
     async with deps.get_db() as db:
-        await db.users.register(
+        res = await db.users.register(
             str(message.from_id),
             str(message.from_user.username),
         )
-    await message.reply('Вы успешно зарегистрированы!')
+
+    if res is True:
+        await message.reply('Вы успешно зарегистрированы!')
+    else:
+        await message.reply('Произошла ошибка при регистрации')
 
 
 @dp.message_handler(state='*', commands='cancel')
