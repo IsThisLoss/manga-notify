@@ -5,7 +5,6 @@ import pytest
 from manga_notify.bot import remind_later
 
 
-
 @pytest.mark.parametrize(
     'now, expected',
     (

@@ -2,6 +2,7 @@ import typing
 
 from . import driver
 from . import mangakakalot_bs
+from . import sovet_romantica_bs
 from . import mangasee_rss
 from . import readmanga_rss
 
@@ -14,12 +15,14 @@ class DriverFactory:
         self.mangasee = mangasee_rss.MangaseeRss()
         self.mangakakalot = mangakakalot_bs.MangakakalotBs()
         self.readmanga = readmanga_rss.ReadmangaRss()
+        self.sovet_romantica = sovet_romantica_bs.SovetRomanticaBs()
 
     def _map(self) -> typing.Dict[str, driver.Driver]:
         return {
-            driver.DriverType.MangaseeRss: self.mangasee,
             driver.DriverType.MangakakalotBs: self.mangakakalot,
+            driver.DriverType.MangaseeRss: self.mangasee,
             driver.DriverType.ReadmangaRss: self.readmanga,
+            driver.DriverType.SovetRomanticaBs: self.sovet_romantica,
         }
 
     def find_driver(self, url: str) -> typing.Optional[str]:
@@ -30,9 +33,11 @@ class DriverFactory:
 
     def get(self, driver_type: str) -> driver.Driver:
         if driver_type == driver.DriverType.MangaseeRss:
-            return mangasee_rss.MangaseeRss()
+            return self.mangasee
         if driver_type == driver.DriverType.MangakakalotBs:
-            return mangakakalot_bs.MangakakalotBs()
+            return self.mangakakalot
         if driver_type == driver.DriverType.ReadmangaRss:
-            return readmanga_rss.ReadmangaRss()
-        raise ValueError(f"Unknown driver {driver_type}")
+            return self.readmanga
+        if driver_type == driver.DriverType.SovetRomanticaBs:
+            return self.sovet_romantica
+        raise ValueError(f"Unknow driver {driver_type}")
