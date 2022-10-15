@@ -1,6 +1,6 @@
 from .basic_rss import BasicRss
 
 
-class MangaseeRss(BasicRss):
+class ReadmangaRss(BasicRss):
     def is_match(self, url: str) -> bool:
-        return 'mangasee' in url
+        return 'readmanga' in url
