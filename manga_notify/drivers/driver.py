@@ -7,9 +7,10 @@ from ..database import feed_storage
 
 
 class DriverType(str):
-    MangaseeRss = 'mangasee_rss'
     MangakakalotBs = 'mangakakalot_bs'
+    MangaseeRss = 'mangasee_rss'
     ReadmangaRss = 'readmanga_rss'
+    SovetRomanticaBs = 'sovet_romantica_bs'
 
 
 @dataclasses.dataclass
