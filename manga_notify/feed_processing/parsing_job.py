@@ -27,4 +27,8 @@ async def run_background_parsing(
             logging.info(f'Got no channels for feed {feed.get_id()}')
             continue
         feed = await processor.process(feed, channels)
-        await db.feeds.update(feed.get_id(), feed.get_cursor())
+        await db.feeds.update(
+            feed.get_id(),
+            feed.get_cursor(),
+            feed.get_title(),
+        )

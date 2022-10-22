@@ -32,5 +32,9 @@ class Driver:
         pass
 
     @abc.abstractmethod
+    def feed_type(self) -> str:
+        pass
+
+    @abc.abstractmethod
     async def parse(self, feed_data: feed_storage.FeedData) -> ParsingResult:
         pass

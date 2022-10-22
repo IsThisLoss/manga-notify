@@ -1,0 +1,2 @@
+ALTER TABLE feeds ADD COLUMN title TEXT;
+ALTER TABLE feeds ADD COLUMN mal_url TEXT;

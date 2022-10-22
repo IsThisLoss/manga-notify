@@ -56,5 +56,9 @@ class FeedManager:
         feed = await self._processor.process(feed)
         if not feed:
             return None
-        await self._db.feeds.update(feed.get_id(), feed.get_cursor())
+        await self._db.feeds.update(
+            feed.get_id(),
+            feed.get_cursor(),
+            feed.get_title(),
+        )
         return feed
