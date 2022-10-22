@@ -47,6 +47,11 @@ class BasicRss(driver.Driver):
                 data = await response.text()
 
         root = ET.fromstring(data)
+
+        title = root.find('./channel/title')
+        if title is not None:
+            feed_data.set_title(str(title.text))
+
         parsed_items = []
         for item in iter_items(root.findall('./channel/item')):
             if item.name == feed_data.get_cursor():
@@ -56,7 +61,10 @@ class BasicRss(driver.Driver):
         if parsed_items:
             feed_data.set_cursor(parsed_items[0].name)
             items = list(reversed(parsed_items))
-            messages = common_message.split_on_chunks(items)
+            messages = common_message.split_on_chunks(
+                items,
+                feed_data.get_mal_url(),
+            )
         return driver.ParsingResult(
             feed_data=feed_data,
             messages=messages,

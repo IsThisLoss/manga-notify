@@ -19,6 +19,7 @@ class TelegramChannel(channel.Channel):
             'send_telegram_message',
             self._chat_id,
             message.serialize(),
+            message.extra(),
         )
 
 

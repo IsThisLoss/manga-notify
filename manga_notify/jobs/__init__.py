@@ -7,6 +7,7 @@ import arq
 from . import background_parsing
 from . import send_telegram_message
 from . import remind_later
+from . import mal_linker
 
 from .. import dependencies
 
@@ -49,6 +50,11 @@ async def run():
             arq.cron(
                 background_parsing.job,
                 name='background_parsing',
+                minute=minutes,
+            ),
+            arq.cron(
+                mal_linker.job,
+                name='mal_linker',
                 minute=minutes,
             )
         ],

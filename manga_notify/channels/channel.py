@@ -12,6 +12,10 @@ class Message:
     def serialize(self) -> str:
         pass
 
+    @abc.abstractmethod
+    def extra(self) -> dict:
+        return {}
+
 
 class Channel:
     """

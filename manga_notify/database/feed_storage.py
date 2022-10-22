@@ -3,12 +3,27 @@ import typing
 import asyncpg
 
 
+class FeedType:
+    Anime = 'anime'
+    Manga = 'manga'
+
+
 class FeedData:
-    def __init__(self, id, driver, url, cursor):
+    def __init__(
+            self,
+            id,
+            driver,
+            url,
+            cursor,
+            title=None,
+            mal_url=None,
+    ):
         self._id = id
         self._driver = driver
         self._url = url
         self._cursor = cursor
+        self._title = title
+        self._mal_url = mal_url
 
     def get_id(self) -> int:
         return self._id
@@ -25,6 +40,18 @@ class FeedData:
     def set_cursor(self, cursor):
         self._cursor = cursor
 
+    def get_title(self) -> typing.Optional[str]:
+        return self._title
+
+    def set_title(self, title: str):
+        self._title = title
+
+    def get_mal_url(self) -> typing.Optional[str]:
+        return self._mal_url
+
+    def set_mal_url(self, mal_url: str):
+        self._mal_url = mal_url
+
 
 class FeedStorage:
     def __init__(self, conn: asyncpg.Connection):
@@ -33,17 +60,19 @@ class FeedStorage:
     async def get_all(self) -> typing.List[FeedData]:
         rows = await self._connection.fetch("""
             SELECT
-                id, driver, url, cursor
+                id, driver, url, cursor, title, mal_url
             FROM
                 feeds
         """)
         result = []
-        for id, driver, url, cursor in rows:
+        for id, driver, url, cursor, title, mal_url in rows:
             data = FeedData(
                 id=id,
                 driver=driver,
                 url=url,
                 cursor=cursor,
+                title=title,
+                mal_url=mal_url,
             )
             result.append(data)
         return result
@@ -51,7 +80,7 @@ class FeedStorage:
     async def get(self, id: int) -> typing.Optional[FeedData]:
         row = await self._connection.fetchrow("""
             SELECT
-                id, driver, url, cursor
+                id, driver, url, cursor, title, mal_url
             FROM
                 feeds
             WHERE
@@ -65,6 +94,8 @@ class FeedStorage:
             driver=row[1],
             url=row[2],
             cursor=row[3],
+            title=row[4],
+            mal_url=row[5],
         )
 
     async def find(self, driver: str, url: str) -> typing.Optional[FeedData]:
@@ -73,7 +104,9 @@ class FeedStorage:
                 id,
                 driver,
                 url,
-                cursor
+                cursor,
+                title,
+                mal_url
             FROM
                 feeds
             WHERE
@@ -82,12 +115,14 @@ class FeedStorage:
         """, driver, url)
         if not row:
             return None
-        id, driver, url, cursor = row
+        id, driver, url, cursor, title, mal_url = row
         return FeedData(
             id=id,
             driver=driver,
             url=url,
             cursor=cursor,
+            title=title,
+            mal_url=mal_url,
         )
 
     async def create(self, driver: str, url: str) -> typing.Optional[FeedData]:
@@ -107,12 +142,71 @@ class FeedStorage:
             cursor='',
         )
 
-    async def update(self, id: int, cursor: str):
-        await self._connection.execute("""
+    async def find_without_mal_link(
+        self,
+        limit: int = 10,
+    ) -> typing.List[FeedData]:
+        rows = await self._connection.fetch("""
+            SELECT
+                id, driver, url, cursor, title, mal_url
+            FROM
+                feeds
+            WHERE
+                title IS NOT NULL
+                AND
+                mal_url IS NULL
+            LIMIT $1
+        """, limit)
+        result = []
+        for id, driver, url, cursor, title, mal_url in rows:
+            data = FeedData(
+                id=id,
+                driver=driver,
+                url=url,
+                cursor=cursor,
+                title=title,
+                mal_url=mal_url,
+            )
+            result.append(data)
+        return result
+
+    async def update(
+        self,
+        id: int,
+        cursor: str,
+        title: typing.Optional[str],
+    ):
+        query = """
             UPDATE
                 feeds
             SET
-                cursor = $1
+                cursor = $2,
+                title = $3
             WHERE
-                id = $2
-        """, cursor, id)
+                id = $1
+        """
+        await self._connection.execute(
+            query,
+            id,
+            cursor,
+            title,
+        )
+
+    async def update_mal_url(
+        self,
+        id: int,
+        mal_url: str,
+    ):
+        query = """
+            UPDATE
+                feeds
+            SET
+                mal_url = $2
+            WHERE
+                id = $1
+        """
+        await self._connection.execute(
+            query,
+            id,
+            mal_url,
+        )
