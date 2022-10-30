@@ -24,7 +24,6 @@ class Settings(pydantic.BaseSettings):
         env_file = '.env'
 
 
-
 @lru_cache()
 def get_config():
     return Settings()

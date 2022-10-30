@@ -14,31 +14,44 @@ HTML = '''
 </head>
 <body>
   <div class="episode-slick-container">
-    <button class="episode-slick_button episode-slick_button-disabled" slider="episodes-slider" mode="backward">
+    <button class="episode-slick_button episode-slick_button-disabled"
+        slider="episodes-slider" mode="backward">
       <i class="material-icons">keyboard_arrow_left</i>
     </button>
-    <div class="episodes-slick" id="episodes-slider" style="scroll-behavior: smooth;">
+    <div class="episodes-slick" id="episodes-slider"
+        style="scroll-behavior: smooth;">
       <div class="episodes-slick_item episode-active" id="num1">
-       <a href="/anime/1382-spy-x-family-part-2/episode_1-subtitles" for="preview26228" class="">
-          <img class="preview--poster lazy loaded" data-src="" src="" id="preview26228" alt="Эпизод 1" loading="lazy" data-was-processed="true">
+       <a href="/anime/1382-spy-x-family-part-2/episode_1-subtitles"
+        for="preview26228" class="">
+          <img class="preview--poster lazy loaded" data-src="" src=""
+            id="preview26228" alt="Эпизод 1"
+            loading="lazy" data-was-processed="true"
+          >
           <div><span>Эпизод #1</span></div>
         </a>
         <nav class="episodeButtons"> </nav>
       </div>
       <div class="episodes-slick_item " id="num2">
-        <a href="/anime/1382-spy-x-family-part-2/episode_2-subtitles" for="preview26266" class="">
-          <img class="preview--poster lazy loaded" data-src="" src="" id="preview26266" alt="Эпизод 2" loading="lazy" data-was-processed="true">
+        <a href="/anime/1382-spy-x-family-part-2/episode_2-subtitles"
+            for="preview26266" class="">
+          <img class="preview--poster lazy loaded" data-src="" src=""
+            id="preview26266" alt="Эпизод 2"
+            loading="lazy" data-was-processed="true"
+          >
           <div><span>Эпизод #2</span></div>
         </a>
       <nav class="episodeButtons"> </nav></div> </div>
-      <button class="episode-slick_button" slider="episodes-slider" mode="forward">
+      <button class="episode-slick_button"
+        slider="episodes-slider" mode="forward">
       <i class="material-icons">keyboard_arrow_right</i>
     </button>
   </div>
   <div class="anime-info">
     <div class="block--container anime-info-block">
       <div class="block--full anime-name">
-        <div class="block--container"> Семья шпиона. Часть 2 / Spy x Family Part 2 </div>
+        <div class="block--container">
+            Семья шпиона. Часть 2 / Spy x Family Part 2
+        </div>
       </div>
     </div>
   </div>
