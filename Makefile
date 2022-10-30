@@ -1,4 +1,4 @@
-.PHONY: all
+.PHONY: tests
 
 run-bot:
 	python -m manga_notify bot
