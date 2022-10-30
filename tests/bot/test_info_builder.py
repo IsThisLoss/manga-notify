@@ -1,5 +1,3 @@
-import pytest
-
 from manga_notify.database import feed_storage
 from manga_notify.bot import info_builder
 
