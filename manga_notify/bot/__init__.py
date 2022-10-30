@@ -6,6 +6,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from . import auth
 from . import callback_data
 from . import remind_later
+from . import info_builder
 from .. import dependencies
 from ..drivers import driver_factory
 from ..feed_processing import subscription
@@ -67,12 +68,16 @@ async def subscriptions_handler(message: types.Message):
         feeds = await user_subscription.get_user_feeds(str(message.from_id))
     data = []
     for feed in feeds:
-        data.append(f'`{feed.get_url()}`')
+        data.append(info_builder.build_feed_info(feed))
     msg = 'Нет активных подписок'
     if data:
         data_str = '\n'.join(data)
         msg = f'Активные подписки:\n{data_str}'
-    await message.reply(msg, types.ParseMode.MARKDOWN)
+    await message.reply(
+        msg,
+        types.ParseMode.MARKDOWN,
+        disable_web_page_preview=True,
+    )
 
 
 class NewSubscription(StatesGroup):
@@ -124,8 +129,9 @@ async def unsubscribe_hander(message: types.Message):
             method=callback_data.Methods.UNSUBSCRIBE,
             payload={'id': feed.get_id()},
         )
+        text = feed.get_title() or feed.get_url()
         keyboard_markup.add(types.InlineKeyboardButton(
-            feed.get_url(),
+            text,
             callback_data=data.serialize(),
         ))
     await message.reply(
