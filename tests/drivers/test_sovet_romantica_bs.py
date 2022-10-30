@@ -48,17 +48,17 @@ HTML = '''
 
 EXPECTED_TWO = (
   'Несколько новых выпусков:\n'
-  '[ Семья шпиона. Часть 2 / Spy x Family Part 2  Эпизод #1]'
+  '[Spy x Family Part 2 Эпизод #1]'
   '(https://sovetromantica.com/anime/1382-spy-x-family-part-2'
   '/episode_1-subtitles)\n'
-  '[ Семья шпиона. Часть 2 / Spy x Family Part 2  Эпизод #2]'
+  '[Spy x Family Part 2 Эпизод #2]'
   '(https://sovetromantica.com/anime/1382-spy-x-family-part-2'
   '/episode_2-subtitles)\n'
 )
 
 EXPECTED_ONE = (
    'Новый выпуск '
-   '[ Семья шпиона. Часть 2 / Spy x Family Part 2  Эпизод #2]'
+   '[Spy x Family Part 2 Эпизод #2]'
    '(https://sovetromantica.com/anime/1382-spy-x-family-part-2'
    '/episode_2-subtitles)'
 )
