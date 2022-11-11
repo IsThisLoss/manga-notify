@@ -1,19 +1,20 @@
-FROM python:3.8.10
-
-RUN apt update && apt install -y supervisor
+FROM python:3.8.15-slim
 
 # supervisord
 COPY supervisor/supervisord.conf /etc/supervisor/supervisord.conf
+RUN python -m pip install supervisor
 
-# deps
+# install requirments
 COPY requirements.txt /tmp/build/requirements.txt
 RUN python -m pip install -r /tmp/build/requirements.txt
 
-# src
-COPY setup.py /tmp/build/setup.py
+# install main application
+COPY README.md /tmp/build/README.md
+COPY pyproject.toml /tmp/build/pyproject.toml
 COPY manga_notify /tmp/build/manga_notify
+RUN cd /tmp/build && python -m pip install .
 
-RUN python -m pip install /tmp/build
-RUN rm -rf /var/build
+# cleanup
+RUN rm -rf /tmp/build && python -m pip cache purge
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+CMD ["python", "-m", "supervisor.supervisord", "-c", "/etc/supervisor/supervisord.conf"]
