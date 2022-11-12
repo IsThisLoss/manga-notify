@@ -44,4 +44,4 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
-          script: cd docker && docker-compose down && TAG={{ github.ref_name }} docker-compose up -d
+          script: cd docker && docker-compose down && TAG=${{ github.ref_name }} docker-compose up -d
