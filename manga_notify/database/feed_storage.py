@@ -1,6 +1,16 @@
+import os
 import typing
 
+import aiosql
 import asyncpg
+
+
+CUR_DIR = os.path.dirname(os.path.abspath(__file__))
+
+queries = aiosql.from_path(
+    CUR_DIR + '/sql/feed_storage.sql',
+    'asyncpg',
+)
 
 
 class FeedType:
@@ -58,12 +68,9 @@ class FeedStorage:
         self._connection = conn
 
     async def get_all(self) -> typing.List[FeedData]:
-        rows = await self._connection.fetch("""
-            SELECT
-                id, driver, url, cursor, title, mal_url
-            FROM
-                feeds
-        """)
+        rows = await queries.get_add(
+            self._connection,
+        )
         result = []
         for id, driver, url, cursor, title, mal_url in rows:
             data = FeedData(
@@ -78,15 +85,10 @@ class FeedStorage:
         return result
 
     async def get(self, id: int) -> typing.Optional[FeedData]:
-        row = await self._connection.fetchrow("""
-            SELECT
-                id, driver, url, cursor, title, mal_url
-            FROM
-                feeds
-            WHERE
-                id = $1
-            LIMIT 1
-        """, id)
+        row = await queries.get(
+            self._connection,
+            id=id,
+        )
         if not row:
             return None
         return FeedData(
@@ -99,20 +101,11 @@ class FeedStorage:
         )
 
     async def find(self, driver: str, url: str) -> typing.Optional[FeedData]:
-        row = await self._connection.fetchrow("""
-            SELECT
-                id,
-                driver,
-                url,
-                cursor,
-                title,
-                mal_url
-            FROM
-                feeds
-            WHERE
-                driver = $1 AND url = $2
-            LIMIT 1
-        """, driver, url)
+        row = await queries.find(
+            self._connection,
+            driver=driver,
+            url=url,
+        )
         if not row:
             return None
         id, driver, url, cursor, title, mal_url = row
@@ -126,13 +119,11 @@ class FeedStorage:
         )
 
     async def create(self, driver: str, url: str) -> typing.Optional[FeedData]:
-        id = await self._connection.fetchval("""
-            INSERT INTO
-                feeds(driver, url)
-            VALUES
-                ($1, $2)
-            RETURNING id
-        """, driver, url)
+        id = await queries.insert(
+            self._connection,
+            driver=driver,
+            url=url,
+        )
         if not id:
             return None
         return FeedData(
@@ -146,17 +137,10 @@ class FeedStorage:
         self,
         limit: int = 10,
     ) -> typing.List[FeedData]:
-        rows = await self._connection.fetch("""
-            SELECT
-                id, driver, url, cursor, title, mal_url
-            FROM
-                feeds
-            WHERE
-                title IS NOT NULL
-                AND
-                mal_url IS NULL
-            LIMIT $1
-        """, limit)
+        rows = await queries.find_without_mal_link(
+            self._connection,
+            limit=limit,
+        )
         result = []
         for id, driver, url, cursor, title, mal_url in rows:
             data = FeedData(
@@ -176,20 +160,11 @@ class FeedStorage:
         cursor: str,
         title: typing.Optional[str],
     ):
-        query = """
-            UPDATE
-                feeds
-            SET
-                cursor = $2,
-                title = $3
-            WHERE
-                id = $1
-        """
-        await self._connection.execute(
-            query,
-            id,
-            cursor,
-            title,
+        await queries.update(
+            self._connection,
+            id=id,
+            cursor=cursor,
+            title=title,
         )
 
     async def update_mal_url(
@@ -197,16 +172,8 @@ class FeedStorage:
         id: int,
         mal_url: str,
     ):
-        query = """
-            UPDATE
-                feeds
-            SET
-                mal_url = $2
-            WHERE
-                id = $1
-        """
-        await self._connection.execute(
-            query,
-            id,
-            mal_url,
+        await queries.update_mal_url(
+            self._connection,
+            id=id,
+            mal_url=mal_url,
         )

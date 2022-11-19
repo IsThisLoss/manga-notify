@@ -4,7 +4,7 @@ run-bot:
 	python -m manga_notify bot
 
 run-jobs:
-	python -m manga_notify bot
+	python -m manga_notify jobs
 
 run-docker:
 	docker-compose up -d --build

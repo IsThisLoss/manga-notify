@@ -19,6 +19,7 @@ classifiers = [
 dependencies = [
   "aiogram==2.21",
   "aiohttp==3.8.1",
+  "aiosql==7.1",
   "arq==0.22",
   "asyncpg==0.26.0",
   "beautifulsoup4==4.10.0",
@@ -43,7 +44,8 @@ dev = [
   "pip-tools==6.9.0",
 ]
 
-[tool.hatch.build.targets.sdist]
+[tool.hatch.build]
 include = [
-    "/manga_notify",
+  "manga_notify/**/*.py",
+  "manga_notify/**/*.sql"
 ]
