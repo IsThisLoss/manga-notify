@@ -39,7 +39,7 @@ FROM
 WHERE
   driver = :driver
   AND
-  url = url
+  url = :url
 LIMIT 1;
 
 -- name: insert<!
