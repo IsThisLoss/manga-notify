@@ -22,7 +22,7 @@ class AnimeJoyBs(driver.Driver):
         anime_name = soup.find('h2', class_='romanji')
         if not anime_name:
             return None
-        return str(anime_name.string)
+        return str(anime_name.string).strip()
 
     def _parse_cursor(self, soup) -> int:
         update_block = soup.find('p', class_='editdate grey')

@@ -86,4 +86,6 @@ async def test_animejoy_bs(
         assert not parsing_result.messages
     else:
         message = parsing_result.messages[0]
+        print("HERE")
+        print(message.serialize())
         assert message.serialize() == expected_message
