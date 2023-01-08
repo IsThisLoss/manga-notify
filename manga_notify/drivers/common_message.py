@@ -47,6 +47,8 @@ def split_on_chunks(
         mal_url: typing.Optional[str] = None,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
 ) -> typing.List[channel.Message]:
+    if not parsed_items:
+        return []
     # TODO add tests
     result: typing.List[channel.Message] = []
     chunk_size = min(chunk_size, len(parsed_items))
