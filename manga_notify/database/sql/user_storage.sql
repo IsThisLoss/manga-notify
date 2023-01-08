@@ -8,7 +8,7 @@ INSERT INTO users (
   id,
   login
 ) VALUES (
-  :id
+  :id,
   :login
 )
 ON CONFLICT (id) DO NOTHING;
