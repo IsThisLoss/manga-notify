@@ -31,6 +31,19 @@ class BasicRss(driver.Driver):
     def is_match(self, url: str) -> bool:
         raise NotImplementedError
 
+    def filter_item(self, item: common_message.ParsingItem) -> bool:
+        """
+        If true, item will be skipped during feed parsing
+        """
+        return False
+
+    def decorate_url(self, url: str) -> str:
+        """
+        Can be redefined in child class to pass secret
+        parameters to url
+        """
+        return url
+
     async def parse(
         self,
         feed_data: feed_storage.FeedData,
@@ -41,7 +54,7 @@ class BasicRss(driver.Driver):
 
         async with aiohttp.ClientSession() as client:
             async with client.get(
-                feed_data.get_url(),
+                self.decorate_url(feed_data.get_url()),
                 headers=headers,
             ) as response:
                 data = await response.text()
@@ -56,6 +69,8 @@ class BasicRss(driver.Driver):
         for item in iter_items(root.findall('./channel/item')):
             if item.name == feed_data.get_cursor():
                 break
+            if self.filter_item(item):
+                continue
             parsed_items.append(item)
         messages: typing.List[channel.Message] = []
         if parsed_items:

@@ -1,0 +1,93 @@
+import pytest
+
+from aioresponses import aioresponses
+
+from manga_notify.database import feed_storage
+from manga_notify.drivers import erai_raws_rss
+
+
+URL = 'https://www.erai-raws.info/anime-list/nierautomata-ver1-1a/'
+
+xml = '''
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:erai="https://www.erai-raws.info/rss-page/" >
+
+<channel>
+<title>NieR:Automata Ver1.1a - Erai-raws Torrent RSS</title>
+	<item>
+	<title>[Torrent] NieR:Automata Ver1.1a - 01 [1080p][us][br][mx][es][fr][de][it][Airing]</title>
+	<link>https://ddl2.erai-raws.info/Torrent/2023/Winter/NieR-Automata Ver1.1a/[Erai-raws] NieR-Automata Ver1.1a - 01 [1080p][Multiple Subtitle].mkv.torrent</link>
+	<pubDate>Sat, 07 Jan 2023 17:42:51 +0000</pubDate>
+	<erai:resolution>1080p</erai:resolution>
+	<erai:linktype>Torrent</erai:linktype>
+	<erai:size>1.35GB</erai:size>
+	<erai:infohash>9bc446346d801d261d1d6894802726e9752aca65</erai:infohash>
+	<erai:subtitles>[us][br][mx][es][fr][de][it]</erai:subtitles><erai:category>[Airing]</erai:category>	<description>
+		<![CDATA[<a href="https://www.erai-raws.info/episodes/nierautomata-ver1-1a-01/">[Erai-raws] NieR-Automata Ver1.1a - 01 [1080p][Multiple Subtitle][DD928942].mkv</a> | Subtitles: [us][br][mx][es][fr][de][it]  | Size: 1.35GB | InfoHash: 9bc446346d801d261d1d6894802726e9752aca65 | Categories: [Airing] ]]>
+	</description>
+</item>
+	<item>
+	<title>[Torrent] NieR:Automata Ver1.1a - 01 [SD][us][br][mx][es][fr][de][it][Airing]</title>
+	<link>https://ddl2.erai-raws.info/Torrent/2023/Winter/NieR-Automata Ver1.1a/[Erai-raws] NieR-Automata Ver1.1a - 01 [480p][Multiple Subtitle].mkv.torrent</link>
+	<pubDate>Sat, 07 Jan 2023 17:42:51 +0000</pubDate>
+	<erai:resolution>SD</erai:resolution>
+	<erai:linktype>Torrent</erai:linktype>
+	<erai:size>361.93MB</erai:size>
+	<erai:infohash>f64cec25a51250e02ced548cab8b27d9fc0e122c</erai:infohash>
+	<erai:subtitles>[us][br][mx][es][fr][de][it]</erai:subtitles><erai:category>[Airing]</erai:category>	<description>
+		<![CDATA[<a href="https://www.erai-raws.info/episodes/nierautomata-ver1-1a-01/">[Erai-raws] NieR-Automata Ver1.1a - 01 [480p][Multiple Subtitle][9EB2BF21].mkv</a> | Subtitles: [us][br][mx][es][fr][de][it]  | Size: 361.93MB | InfoHash: f64cec25a51250e02ced548cab8b27d9fc0e122c | Categories: [Airing] ]]>
+	</description>
+</item>
+	</channel>
+</rss>
+'''
+
+EXPECTED = (
+   'Новый выпуск '
+   '[Chapter 63]'
+   '(https://chapmanganato.com/manga-th970764/chapter-63)'
+)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    'db_cursor,expected_message',
+    (
+        pytest.param(
+            None,
+            EXPECTED,
+            id='first_run',
+        ),
+        pytest.param(
+            'Chapter 63',
+            None,
+            id='no_new_episode',
+        ),
+    )
+)
+async def test_chapmanganato_bs(
+    db_cursor,
+    expected_message,
+):
+    driver = chapmanganato_bs.ChapmanganatoBs()
+    feed_data = feed_storage.FeedData(
+        id=1,
+        driver='chapmanganato_bs',
+        url=URL,
+        cursor=db_cursor,
+    )
+
+    with aioresponses() as mocked:
+        mocked.get(
+            URL,
+            status=200,
+            body=HTML,
+        )
+        parsing_result = await driver.parse(feed_data)
+
+    assert parsing_result.feed_data.get_cursor() == 'Chapter 63'
+    if not expected_message:
+        assert not parsing_result.messages
+    else:
+        message = parsing_result.messages[0]
+        assert message.serialize() == expected_message
+

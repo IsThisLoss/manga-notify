@@ -22,13 +22,18 @@ class ParsingItemMessage(channel.Message):
         self._parsed_items = parsed_items
         self._mal_url = mal_url
 
+    def escape(self, name: str) -> str:
+        return name.replace('[', ' ').replace(']', ' ')
+
     def _serialize_one(self, parsed_item: ParsingItem) -> str:
-        return f'Новый выпуск [{parsed_item.name}]({parsed_item.link})'
+        name = self.escape(parsed_item.name)
+        return f'Новый выпуск [{name}]({parsed_item.link})'
 
     def _serialize_many(self, parsed_items: typing.List[ParsingItem]) -> str:
         result = 'Несколько новых выпусков:\n'
         for parsed_item in parsed_items:
-            result += f'[{parsed_item.name}]({parsed_item.link})\n'
+            name = self.escape(parsed_item.name)
+            result += f'[{name}]({parsed_item.link})\n'
         return result
 
     def serialize(self) -> str:
