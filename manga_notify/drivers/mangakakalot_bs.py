@@ -16,6 +16,9 @@ class MangakakalotBs(driver.Driver):
     def feed_type(self) -> str:
         return feed_storage.FeedType.Manga
 
+    def chapter_list_class(self) -> str:
+        return 'chapter-list'
+
     async def parse(
         self,
         feed_data: feed_storage.FeedData,
@@ -32,7 +35,7 @@ class MangakakalotBs(driver.Driver):
             title = str(h1.string)
             feed_data.set_title(title)
 
-        chapter_list = soup.find('div', class_='chapter-list')
+        chapter_list = soup.find('div', class_=self.chapter_list_class())
         if not chapter_list:
             raise Exception("No chapters")
         chapters = chapter_list.find_all('a')

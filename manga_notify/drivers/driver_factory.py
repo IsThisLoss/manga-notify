@@ -2,6 +2,7 @@ import typing
 
 from . import driver
 from . import animejoy_bs
+from . import chapmanganato_bs
 from . import mangakakalot_bs
 from . import mangasee_rss
 from . import readmanga_rss
@@ -18,6 +19,7 @@ class DriverFactory:
         self.readmanga = readmanga_rss.ReadmangaRss()
         self.sovet_romantica = sovet_romantica_bs.SovetRomanticaBs()
         self.animejoy = animejoy_bs.AnimeJoyBs()
+        self.chapmanganato = chapmanganato_bs.ChapmanganatoBs()
 
     def _map(self) -> typing.Dict[str, driver.Driver]:
         return {
@@ -26,6 +28,7 @@ class DriverFactory:
             driver.DriverType.ReadmangaRss: self.readmanga,
             driver.DriverType.SovetRomanticaBs: self.sovet_romantica,
             driver.DriverType.AnimeJoyBs: self.animejoy,
+            driver.DriverType.ChapmanganatoBs: self.chapmanganato,
         }
 
     def find_driver(self, url: str) -> typing.Optional[str]:
