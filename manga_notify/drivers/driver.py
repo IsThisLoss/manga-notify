@@ -12,6 +12,7 @@ class DriverType(str):
     ReadmangaRss = 'readmanga_rss'
     SovetRomanticaBs = 'sovet_romantica_bs'
     AnimeJoyBs = 'animejoy_bs'
+    ChapmanganatoBs = 'chapmanganato_bs'
 
 
 @dataclasses.dataclass
