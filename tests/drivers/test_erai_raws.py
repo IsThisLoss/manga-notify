@@ -40,14 +40,11 @@ xmlns:erai="https://www.erai-raws.info/rss-page/">
 '''
 
 CURSOR = (
-    '[Torrent] NieR:Automata Ver1.1a - 01 '
-    '[720p][us][Airing]'
+    'Torrent NieR:Automata Ver1.1a - 01 '
+    '720p us Airing'
 )
 
-TITLE = (
-    ' Torrent  NieR:Automata Ver1.1a - 01 '
-    ' 720p  us  Airing '
-)
+TITLE = CURSOR
 
 EXPECTED = (
    'Новый выпуск '
