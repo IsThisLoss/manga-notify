@@ -13,6 +13,7 @@ class DriverType(str):
     SovetRomanticaBs = 'sovet_romantica_bs'
     AnimeJoyBs = 'animejoy_bs'
     ChapmanganatoBs = 'chapmanganato_bs'
+    EraiRawsRss = 'erai_raws_rss'
 
 
 @dataclasses.dataclass

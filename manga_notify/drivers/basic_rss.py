@@ -31,6 +31,36 @@ class BasicRss(driver.Driver):
     def is_match(self, url: str) -> bool:
         raise NotImplementedError
 
+    def _get_url(self, feed_data: feed_storage.FeedData) -> str:
+        """
+        Can be redefined in child class to pass secret
+        parameters to url
+        """
+        return feed_data.get_url()
+
+    def _get_title(self, channel_title: str) -> str:
+        """
+        Can be redefined in child class
+        to modify title
+        """
+        return channel_title
+
+    def _filter_item(self, item: common_message.ParsingItem) -> bool:
+        """
+        If true, item will be skipped during feed parsing
+        """
+        return False
+
+    def _get_item(
+        self,
+        item: common_message.ParsingItem,
+    ) -> common_message.ParsingItem:
+        """
+        Can be redefined in child class to
+        sanitize title
+        """
+        return item
+
     async def parse(
         self,
         feed_data: feed_storage.FeedData,
@@ -40,8 +70,9 @@ class BasicRss(driver.Driver):
         }
 
         async with aiohttp.ClientSession() as client:
+            url = self._get_url(feed_data)
             async with client.get(
-                feed_data.get_url(),
+                url,
                 headers=headers,
             ) as response:
                 data = await response.text()
@@ -54,9 +85,14 @@ class BasicRss(driver.Driver):
 
         parsed_items = []
         for item in iter_items(root.findall('./channel/item')):
+            item = self._get_item(item)
+            if self._filter_item(item):
+                continue
+            print(f'{item.name} == {feed_data.get_cursor()}')
             if item.name == feed_data.get_cursor():
                 break
             parsed_items.append(item)
+
         messages: typing.List[channel.Message] = []
         if parsed_items:
             feed_data.set_cursor(parsed_items[0].name)
@@ -65,6 +101,7 @@ class BasicRss(driver.Driver):
                 items,
                 feed_data.get_mal_url(),
             )
+
         return driver.ParsingResult(
             feed_data=feed_data,
             messages=messages,

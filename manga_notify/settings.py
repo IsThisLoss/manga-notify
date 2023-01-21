@@ -1,3 +1,4 @@
+import typing
 from functools import lru_cache
 
 import pydantic
@@ -19,6 +20,9 @@ class Settings(pydantic.BaseSettings):
     aiogram_fsm_prefix: 'str' = 'aiogram_fsm'
 
     parsing_interval: int  # interval in minutes to run background parsing
+
+    # Token to access erai-raws
+    erai_raws_token: typing.Optional[str] = None
 
     class Config:
         env_file = '.env'
