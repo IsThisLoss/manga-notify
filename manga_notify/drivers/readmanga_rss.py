@@ -5,7 +5,10 @@ from ..database import feed_storage
 
 class ReadmangaRss(BasicRss):
     def is_match(self, url: str) -> bool:
-        return 'readmanga' in url
+        for name in ('readmanga', 'mintmanga'):
+            if name in url:
+                return True
+        return False
 
     def feed_type(self) -> str:
         return feed_storage.FeedType.Manga
