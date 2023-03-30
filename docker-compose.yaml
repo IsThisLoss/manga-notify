@@ -7,19 +7,19 @@ services:
     environment:
       TG_TOKEN: "${TG_TOKEN}"
       PARSING_INTERVAL: "${PARSING_INTERVAL:-15}"
-    restart: unless-stopped
+    restart: on-failure
 
   redis:
     image: redis:alpine
     network_mode: host
-    restart: always
+    restart: on-failure
     volumes:
       - ./volumes/redis:/data
 
   postgres:
     image: postgres:14
     network_mode: host
-    restart: always
+    restart: on-failure
     environment:
       POSTGRES_USER: manga_notify
       POSTGRES_DB: manga_notify

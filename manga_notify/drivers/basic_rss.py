@@ -75,6 +75,7 @@ class BasicRss(driver.Driver):
                 url,
                 headers=headers,
             ) as response:
+                response.raise_for_status()
                 data = await response.text()
 
         root = ET.fromstring(data)
