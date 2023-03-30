@@ -26,6 +26,7 @@ class MangakakalotBs(driver.Driver):
 
         async with aiohttp.ClientSession() as client:
             async with client.get(feed_data.get_url()) as response:
+                response.raise_for_status()
                 data = await response.text()
 
         soup = BeautifulSoup(data, 'html.parser')
