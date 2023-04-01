@@ -4,7 +4,6 @@ import aiohttp
 from bs4 import BeautifulSoup
 
 from . import driver
-from . import common_message
 from ..database import feed_storage
 
 
@@ -65,15 +64,12 @@ class AnimeJoyBs(driver.Driver):
 
         if cur_cursor > db_cursor:
             feed_data.set_cursor(str(cur_cursor))
-            parsed_items.append(common_message.ParsingItem(
+            parsed_items.append(driver.ParsingItem(
                 name=anime_name,
                 link=feed_data.get_url(),
             ))
 
         return driver.ParsingResult(
             feed_data=feed_data,
-            messages=common_message.split_on_chunks(
-                parsed_items,
-                feed_data.get_mal_url(),
-            )
+            items=parsed_items,
         )

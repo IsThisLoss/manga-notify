@@ -3,6 +3,7 @@ from aioresponses import aioresponses
 
 from manga_notify.database import feed_storage
 from manga_notify.drivers import mangaplus
+from manga_notify.drivers.driver import ParsingItem
 import manga_notify.drivers.mangaplus.response_pb2 as pb
 
 
@@ -31,33 +32,31 @@ MOCK_DATA = pb.Response(
 
 TITLE = 'Oshi no Ko Chapter 113: COMMERCIAL WORK'
 CURSOR = 'Chapter 113: COMMERCIAL WORK'
-
-EXPECTED = (
-   'Новый выпуск '
-   f'[{TITLE}]'
-   f'({FEED_URL})'
+EXPECTED = ParsingItem(
+    name=TITLE,
+    link=FEED_URL,
 )
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    'db_cursor,expected_message',
+    'db_cursor,expected_items',
     (
         pytest.param(
             None,
-            EXPECTED,
+            [EXPECTED],
             id='first_run',
         ),
         pytest.param(
             CURSOR,
-            None,
+            [],
             id='no_new_episode',
         ),
     )
 )
 async def test_mangaplus(
     db_cursor,
-    expected_message,
+    expected_items,
 ):
     driver = mangaplus.Mangaplus()
     feed_data = feed_storage.FeedData(
@@ -76,8 +75,4 @@ async def test_mangaplus(
         parsing_result = await driver.parse(feed_data)
 
     assert parsing_result.feed_data.get_cursor() == CURSOR
-    if not expected_message:
-        assert not parsing_result.messages
-    else:
-        message = parsing_result.messages[0]
-        assert message.serialize() == expected_message
+    assert parsing_result.items == expected_items

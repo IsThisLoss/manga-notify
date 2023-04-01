@@ -4,6 +4,7 @@ from aioresponses import aioresponses
 
 from manga_notify.database import feed_storage
 from manga_notify.drivers import animejoy_bs
+from manga_notify.drivers.driver import ParsingItem
 
 
 URL = (
@@ -32,38 +33,39 @@ HTML = '''
 </html>
 '''
 
-EXPECTED = (
-   'Новый выпуск '
-   '[Mobile Suit Gundam: The Witch from Mercury]'
-   '(https://animejoy.ru/tv-serialy/2949-mobilnyy'
-   '-voin-gandam-vedma-s-merkuriya.html)'
+EXPECTED = ParsingItem(
+   name='Mobile Suit Gundam: The Witch from Mercury',
+   link=(
+    'https://animejoy.ru/tv-serialy/2949-mobilnyy'
+    '-voin-gandam-vedma-s-merkuriya.html'
+   ),
 )
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    'db_cursor,expected_message',
+    'db_cursor,expected_items',
     (
         pytest.param(
             None,
-            EXPECTED,
+            [EXPECTED],
             id='first_run',
         ),
         pytest.param(
             '10',
-            EXPECTED,
+            [EXPECTED],
             id='new_episode',
         ),
         pytest.param(
             '11',
-            None,
+            [],
             id='no_new_episode',
         ),
     )
 )
 async def test_animejoy_bs(
     db_cursor,
-    expected_message,
+    expected_items,
 ):
     driver = animejoy_bs.AnimeJoyBs()
     feed_data = feed_storage.FeedData(
@@ -82,10 +84,4 @@ async def test_animejoy_bs(
         parsing_result = await driver.parse(feed_data)
 
     assert parsing_result.feed_data.get_cursor() == '11'
-    if not expected_message:
-        assert not parsing_result.messages
-    else:
-        message = parsing_result.messages[0]
-        print("HERE")
-        print(message.serialize())
-        assert message.serialize() == expected_message
+    assert parsing_result.items == expected_items

@@ -1,6 +1,7 @@
 import typing
 import logging
 
+from . import feed_message
 from ..drivers import driver_factory
 from ..database import feed_storage
 from ..channels import channel
@@ -25,9 +26,13 @@ class FeedProcessor:
         logging.info(f'Going to parse feed_id = {feed.get_id()}')
         driver = self._drivers.get(feed.get_driver())
         parsed = await driver.parse(feed)
-        logging.info(f'Parsed {len(parsed.messages)} messages')
+        messages = feed_message.create_messages(
+            parsed.items,
+            parsed.feed_data.get_mal_url(),
+        )
+        logging.info(f'Parsed {len(messages)} messages')
         if channels:
-            await self._send_to_channels(channels, parsed.messages)
+            await self._send_to_channels(channels, messages)
         logging.info('Flush')
         return parsed.feed_data
 

@@ -2,9 +2,9 @@ import typing
 
 from .basic_rss import BasicRss
 
+from . import driver
 from ..database import feed_storage
 from .. import dependencies
-from . import common_message
 
 
 class EraiRawsRss(BasicRss):
@@ -31,15 +31,15 @@ class EraiRawsRss(BasicRss):
             return channel_title
         return str(parts[0:idx]).strip()
 
-    def _filter_item(self, item: common_message.ParsingItem) -> bool:
+    def _filter_item(self, item: driver.ParsingItem) -> bool:
         is_match = 'Torrent' in item.name
         return not is_match
 
     def _get_item(
         self,
-        item: common_message.ParsingItem,
-    ) -> common_message.ParsingItem:
-        return common_message.ParsingItem(
+        item: driver.ParsingItem,
+    ) -> driver.ParsingItem:
+        return driver.ParsingItem(
             name=self.__fix_name(item.name),
             link=item.link,
         )
