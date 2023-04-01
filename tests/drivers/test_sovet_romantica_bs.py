@@ -4,6 +4,7 @@ from aioresponses import aioresponses
 
 from manga_notify.database import feed_storage
 from manga_notify.drivers import sovet_romantica_bs
+from manga_notify.drivers.driver import ParsingItem
 
 URL = 'http://sovetromantica.com/anime/spyxfamily'
 
@@ -59,48 +60,47 @@ HTML = '''
 </html>
 '''
 
-EXPECTED_TWO = (
-  'Несколько новых выпусков:\n'
-  '[Spy x Family Part 2 Эпизод #1]'
-  '(https://sovetromantica.com/anime/1382-spy-x-family-part-2'
-  '/episode_1-subtitles)\n'
-  '[Spy x Family Part 2 Эпизод #2]'
-  '(https://sovetromantica.com/anime/1382-spy-x-family-part-2'
-  '/episode_2-subtitles)\n'
+ONE = ParsingItem(
+    name='Spy x Family Part 2 Эпизод #1',
+    link=(
+        'https://sovetromantica.com/anime/1382-spy-x-family-part-2'
+        '/episode_1-subtitles'
+    ),
 )
 
-EXPECTED_ONE = (
-   'Новый выпуск '
-   '[Spy x Family Part 2 Эпизод #2]'
-   '(https://sovetromantica.com/anime/1382-spy-x-family-part-2'
-   '/episode_2-subtitles)'
+TWO = ParsingItem(
+    name='Spy x Family Part 2 Эпизод #2',
+    link=(
+        'https://sovetromantica.com/anime/1382-spy-x-family-part-2'
+        '/episode_2-subtitles'
+    ),
 )
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    'db_cursor,expected_message',
+    'db_cursor,expected_items',
     (
         pytest.param(
             None,
-            EXPECTED_TWO,
+            [ONE, TWO],
             id='first_run',
         ),
         pytest.param(
             '0',
-            EXPECTED_ONE,
+            [TWO],
             id='only_second_episode',
         ),
         pytest.param(
             '1',
-            None,
+            [],
             id='no_new_episode',
         ),
     )
 )
 async def test_sovet_romantica_bs(
     db_cursor,
-    expected_message,
+    expected_items,
 ):
     driver = sovet_romantica_bs.SovetRomanticaBs()
     feed_data = feed_storage.FeedData(
@@ -119,8 +119,4 @@ async def test_sovet_romantica_bs(
         parsing_result = await driver.parse(feed_data)
 
     assert parsing_result.feed_data.get_cursor() == '1'
-    if not expected_message:
-        assert not parsing_result.messages
-    else:
-        message = parsing_result.messages[0]
-        assert message.serialize() == expected_message
+    assert parsing_result.items == expected_items

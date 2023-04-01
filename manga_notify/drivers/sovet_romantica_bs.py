@@ -4,8 +4,6 @@ import aiohttp
 from bs4 import BeautifulSoup
 
 from . import driver
-from . import common_message
-from ..channels import channel
 from ..database import feed_storage
 
 
@@ -61,18 +59,14 @@ class SovetRomanticaBs(driver.Driver):
             new_cursor = idx
             title = str(episode.find('span').string)
             href = episode.get('href')
-            parsed_items.append(common_message.ParsingItem(
+            parsed_items.append(driver.ParsingItem(
                 name=f'{anime_name} {title}',
                 link=f'{BASE_URL}{href}',
             ))
-        messages: typing.List[channel.Message] = []
         if parsed_items:
             feed_data.set_cursor(str(new_cursor))
-            messages = common_message.split_on_chunks(
-                parsed_items,
-                feed_data.get_mal_url(),
-            )
+
         return driver.ParsingResult(
             feed_data=feed_data,
-            messages=messages,
+            items=parsed_items,
         )

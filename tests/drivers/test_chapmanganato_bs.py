@@ -4,6 +4,7 @@ from aioresponses import aioresponses
 
 from manga_notify.database import feed_storage
 from manga_notify.drivers import chapmanganato_bs
+from manga_notify.drivers.driver import ParsingItem
 
 
 URL = 'https://chapmanganato.com/manga-th970764'
@@ -28,32 +29,31 @@ HTML = '''
 </html>
 '''
 
-EXPECTED = (
-   'Новый выпуск '
-   '[Chapter 63]'
-   '(https://chapmanganato.com/manga-th970764/chapter-63)'
+EXPECTED = ParsingItem(
+   name='Chapter 63',
+   link='https://chapmanganato.com/manga-th970764/chapter-63',
 )
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    'db_cursor,expected_message',
+    'db_cursor,expected_items',
     (
         pytest.param(
             None,
-            EXPECTED,
+            [EXPECTED],
             id='first_run',
         ),
         pytest.param(
             'Chapter 63',
-            None,
+            [],
             id='no_new_episode',
         ),
     )
 )
 async def test_chapmanganato_bs(
     db_cursor,
-    expected_message,
+    expected_items,
 ):
     driver = chapmanganato_bs.ChapmanganatoBs()
     feed_data = feed_storage.FeedData(
@@ -72,8 +72,4 @@ async def test_chapmanganato_bs(
         parsing_result = await driver.parse(feed_data)
 
     assert parsing_result.feed_data.get_cursor() == 'Chapter 63'
-    if not expected_message:
-        assert not parsing_result.messages
-    else:
-        message = parsing_result.messages[0]
-        assert message.serialize() == expected_message
+    assert parsing_result.items == expected_items

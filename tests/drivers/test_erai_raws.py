@@ -5,6 +5,7 @@ from aioresponses import aioresponses
 
 from manga_notify.database import feed_storage
 from manga_notify.drivers import erai_raws_rss
+from manga_notify.drivers.driver import ParsingItem
 
 
 URL = 'https://www.erai-raws.info/anime-list/nierautomata-ver1-1a/'
@@ -46,32 +47,31 @@ CURSOR = (
 
 TITLE = CURSOR
 
-EXPECTED = (
-   'Новый выпуск '
-   f'[{TITLE}]'
-   '(magnet:123)'
+EXPECTED = ParsingItem(
+   name=TITLE,
+   link='magnet:123',
 )
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    'db_cursor,expected_message',
+    'db_cursor,expected_items',
     (
         pytest.param(
             None,
-            EXPECTED,
+            [EXPECTED],
             id='first_run',
         ),
         pytest.param(
             CURSOR,
-            None,
+            [],
             id='no_new_episode',
         ),
     )
 )
 async def test_chapmanganato_bs(
     db_cursor,
-    expected_message,
+    expected_items,
 ):
     driver = erai_raws_rss.EraiRawsRss()
     feed_data = feed_storage.FeedData(
@@ -90,8 +90,4 @@ async def test_chapmanganato_bs(
         parsing_result = await driver.parse(feed_data)
 
     assert parsing_result.feed_data.get_cursor() == CURSOR
-    if not expected_message:
-        assert not parsing_result.messages
-    else:
-        message = parsing_result.messages[0]
-        assert message.serialize() == expected_message
+    assert parsing_result.items == expected_items

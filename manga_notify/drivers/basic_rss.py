@@ -1,11 +1,8 @@
-import typing
 import aiohttp
 
 import xml.etree.ElementTree as ET
 
 from . import driver
-from . import common_message
-from ..channels import channel
 from ..database import feed_storage
 
 
@@ -21,7 +18,7 @@ def iter_items(items):
         link = item.find('link').text
         if not title:
             continue
-        yield common_message.ParsingItem(
+        yield driver.ParsingItem(
             name=title,
             link=link,
         )
@@ -45,7 +42,7 @@ class BasicRss(driver.Driver):
         """
         return channel_title
 
-    def _filter_item(self, item: common_message.ParsingItem) -> bool:
+    def _filter_item(self, item: driver.ParsingItem) -> bool:
         """
         If true, item will be skipped during feed parsing
         """
@@ -53,8 +50,8 @@ class BasicRss(driver.Driver):
 
     def _get_item(
         self,
-        item: common_message.ParsingItem,
-    ) -> common_message.ParsingItem:
+        item: driver.ParsingItem,
+    ) -> driver.ParsingItem:
         """
         Can be redefined in child class to
         sanitize title
@@ -93,16 +90,11 @@ class BasicRss(driver.Driver):
                 break
             parsed_items.append(item)
 
-        messages: typing.List[channel.Message] = []
         if parsed_items:
             feed_data.set_cursor(parsed_items[0].name)
-            items = list(reversed(parsed_items))
-            messages = common_message.split_on_chunks(
-                items,
-                feed_data.get_mal_url(),
-            )
+            parsed_items.reverse()
 
         return driver.ParsingResult(
             feed_data=feed_data,
-            messages=messages,
+            items=parsed_items,
         )

@@ -3,8 +3,6 @@ import aiohttp
 
 from . import response_pb2
 from .. import driver
-from .. import common_message
-from ...channels import channel
 from ...database import feed_storage
 
 
@@ -64,33 +62,28 @@ class Mangaplus(driver.Driver):
         if title_detail.title.name is not None:
             feed_data.set_title(str(title_detail.title.name))
 
-        parsed_items = []
+        new_items = []
         for item in reversed(title_detail.chapters.last_chapter_list):
             if item.sub_title == feed_data.get_cursor():
                 break
-            parsed_items.append(common_message.ParsingItem(
+            new_items.append(driver.ParsingItem(
                 name=item.sub_title,
                 link=feed_data.get_url(),
             ))
 
-        messages: typing.List[channel.Message] = []
-        if parsed_items:
-            feed_data.set_cursor(parsed_items[0].name)
-            items = []
-            for item in reversed(parsed_items):
-                items.append(common_message.ParsingItem(
+        parsed_items = []
+        if new_items:
+            feed_data.set_cursor(new_items[0].name)
+            for item in reversed(new_items):
+                parsed_items.append(driver.ParsingItem(
                     name=self._format_item_name(
                         feed_data.get_title(),
                         item.name,
                     ),
                     link=item.link,
                 ))
-            messages = common_message.split_on_chunks(
-                items,
-                feed_data.get_mal_url(),
-            )
 
         return driver.ParsingResult(
             feed_data=feed_data,
-            messages=messages,
+            items=parsed_items,
         )

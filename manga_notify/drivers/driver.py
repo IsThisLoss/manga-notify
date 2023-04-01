@@ -2,7 +2,6 @@ import abc
 import dataclasses
 import typing
 
-from ..channels import channel
 from ..database import feed_storage
 
 
@@ -17,17 +16,23 @@ class DriverType(str):
     Mangaplus = 'mangaplus'
 
 
+@dataclasses.dataclass(frozen=True, order=True)
+class ParsingItem:
+    name: str
+    link: str
+
+
 @dataclasses.dataclass
 class ParsingResult:
     """
     Describes result of Driver.parse method
     feed_data is updated feed data that should be
     put into storage
-    messages is list of new messages extracted from
+    items is list of new items extracted from
     data source since last run
     """
     feed_data: feed_storage.FeedData
-    messages: typing.List[channel.Message]
+    items: typing.List[ParsingItem]
 
 
 class Driver:

@@ -1,11 +1,8 @@
-import typing
 import aiohttp
 
 from bs4 import BeautifulSoup
 
 from . import driver
-from . import common_message
-from ..channels import channel
 from ..database import feed_storage
 
 
@@ -46,20 +43,16 @@ class MangakakalotBs(driver.Driver):
             href = str(charpter.get('href'))
             if title == feed_data.get_cursor():
                 break
-            parsed_items.append(common_message.ParsingItem(
+            parsed_items.append(driver.ParsingItem(
                 name=title,
                 link=href,
             ))
 
-        messages: typing.List[channel.Message] = []
         if parsed_items:
             feed_data.set_cursor(parsed_items[0].name)
-            items = list(reversed(parsed_items))
-            messages = common_message.split_on_chunks(
-                items,
-                feed_data.get_mal_url(),
-            )
+            parsed_items.reverse()
+
         return driver.ParsingResult(
             feed_data=feed_data,
-            messages=messages,
+            items=parsed_items,
         )
