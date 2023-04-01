@@ -14,6 +14,7 @@ class DriverType(str):
     AnimeJoyBs = 'animejoy_bs'
     ChapmanganatoBs = 'chapmanganato_bs'
     EraiRawsRss = 'erai_raws_rss'
+    Mangaplus = 'mangaplus'
 
 
 @dataclasses.dataclass

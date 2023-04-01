@@ -8,6 +8,7 @@ from . import mangakakalot_bs
 from . import mangasee_rss
 from . import readmanga_rss
 from . import sovet_romantica_bs
+from . import mangaplus
 
 
 class DriverFactory:
@@ -23,6 +24,7 @@ class DriverFactory:
         # self.animejoy = animejoy_bs.AnimeJoyBs()
         self.chapmanganato = chapmanganato_bs.ChapmanganatoBs()
         self.erai_raws_rss = erai_raws_rss.EraiRawsRss()
+        self.mangaplus = mangaplus.Mangaplus()
 
     def _map(self) -> typing.Dict[str, driver.Driver]:
         return {
@@ -34,6 +36,7 @@ class DriverFactory:
             # driver.DriverType.AnimeJoyBs: self.animejoy,
             driver.DriverType.ChapmanganatoBs: self.chapmanganato,
             driver.DriverType.EraiRawsRss: self.erai_raws_rss,
+            driver.DriverType.Mangaplus: self.mangaplus,
         }
 
     def find_driver(self, url: str) -> typing.Optional[str]:

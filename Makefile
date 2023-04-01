@@ -16,7 +16,7 @@ down-dev-env:
 	docker-compose down
 
 mypy-check:
-	python -m mypy --ignore-missing-imports manga_notify tests
+	python -m mypy manga_notify tests
 
 flake8-check:
 	python -m flake8 manga_notify	tests

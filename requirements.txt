@@ -48,6 +48,8 @@ multidict==6.0.2
     # via
     #   aiohttp
     #   yarl
+protobuf==4.22.1
+    # via manga-notify (pyproject.toml)
 pydantic==1.8.2
     # via
     #   arq
