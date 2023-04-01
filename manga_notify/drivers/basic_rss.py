@@ -89,7 +89,6 @@ class BasicRss(driver.Driver):
             item = self._get_item(item)
             if self._filter_item(item):
                 continue
-            print(f'{item.name} == {feed_data.get_cursor()}')
             if item.name == feed_data.get_cursor():
                 break
             parsed_items.append(item)
