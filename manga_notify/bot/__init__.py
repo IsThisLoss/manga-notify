@@ -9,6 +9,7 @@ from . import remind_later
 from . import info_builder
 from .. import dependencies
 from ..drivers import driver_factory
+from ..external import mal
 from ..feed_processing import subscription
 
 
@@ -184,3 +185,52 @@ async def later_callback(callback_query: types.CallbackQuery):
     await remind_later.button_callback(deps, user_id, message_id, data)
 
     await callback_query.answer('Готово')
+
+
+class MalSearch(StatesGroup):
+    query = State()
+
+
+@dp.message_handler(commands='mal')
+async def mal_handler(message: types.Message):
+    sargs = message.get_args()
+    if sargs:
+        args = sargs.split()
+        x = len(args) >= 2 and args[0] in ('anime', 'manga')
+        if x:
+            my_anime_list = mal.MyAnimeList()
+            items = await my_anime_list.find(args[0], ' '.join(args[1:]), limit=1)
+            if items:
+                msg = 'Нашлось:\n'
+                msg += f'[{items[0].title}]({items[0].link})\n'
+            else:
+                msg = 'Ничего не нашлось'
+            await message.reply(
+                msg,
+                parse_mode=types.ParseMode.MARKDOWN,
+            )
+            return
+
+    await MalSearch.query.set()
+    await message.reply('Введи название тайтла')
+
+
+@dp.message_handler(state=MalSearch.query)
+async def url_state(message: types.Message, state: FSMContext):
+    query = message.text.strip()
+    await state.finish()
+
+    my_anime_list = mal.MyAnimeList()
+    msg = 'Нашлось:\n'
+    items = await my_anime_list.find('anime', query, limit=5)
+    msg += 'Аниме:\n'
+    for item in items:
+        msg += f'[{item.title}]({item.link})\n'
+    items = await my_anime_list.find('manga', query, limit=5)
+    msg += 'Манга:\n'
+    for item in items:
+        msg += f'[{item.title}]({item.link})\n'
+    await message.reply(
+        msg,
+        parse_mode=types.ParseMode.MARKDOWN,
+    )
