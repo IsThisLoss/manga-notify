@@ -9,7 +9,6 @@ from . import remind_later
 from . import info_builder
 from .. import dependencies
 from ..drivers import driver_factory
-from ..external import mal
 from ..feed_processing import subscription
 
 
@@ -19,7 +18,8 @@ def _make_help():
         "/start регистрирует пользователя\n"
         "/subscribe подписывает пользователя на обновления\n"
         "/subscriptions возвращает список активных подписок\n"
-        "/unsubscribe отписывает пользователя от обновлений"
+        "/unsubscribe отписывает пользователя от обновлений\n"
+        "/mal поиск тайтлов MyAnimeList"
     )
     return msg.strip()
 
