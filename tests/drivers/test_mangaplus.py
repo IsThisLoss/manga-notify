@@ -22,6 +22,7 @@ MOCK_DATA = pb.Response(
             chapters=pb.ChaptersView(
                 last_chapter_list=[
                     pb.Chapter(
+                        chapter_id=1015784,
                         sub_title='Chapter 113: COMMERCIAL WORK',
                     )
                 ],
@@ -31,10 +32,11 @@ MOCK_DATA = pb.Response(
 )
 
 TITLE = 'Oshi no Ko Chapter 113: COMMERCIAL WORK'
+URL = 'https://mangaplus.shueisha.co.jp/viewer/1015784'
 CURSOR = 'Chapter 113: COMMERCIAL WORK'
 EXPECTED = ParsingItem(
     name=TITLE,
-    link=FEED_URL,
+    link=URL,
 )
 
 

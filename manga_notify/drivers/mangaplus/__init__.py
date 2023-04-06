@@ -18,6 +18,10 @@ class Mangaplus(driver.Driver):
         'title_detailV2?title_id={manga_id}'
     )
 
+    _CHAPTER_URL = (
+        'https://mangaplus.shueisha.co.jp/viewer/{chapter_id}'
+    )
+
     def is_match(self, url: str) -> bool:
         return 'mangaplus.shueisha.co.jp' in url
 
@@ -68,7 +72,7 @@ class Mangaplus(driver.Driver):
                 break
             new_items.append(driver.ParsingItem(
                 name=item.sub_title,
-                link=feed_data.get_url(),
+                link=self._CHAPTER_URL.format(chapter_id=item.chapter_id),
             ))
 
         parsed_items = []
