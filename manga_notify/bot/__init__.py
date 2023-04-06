@@ -15,13 +15,13 @@ from ..feed_processing import subscription
 
 def _make_help():
     msg = (
-        "/help выводит это сообщение\n"
-        "/start регистрирует пользователя\n"
-        "/subscribe подписывает пользователя на обновления\n"
-        "/subscriptions возвращает список активных подписок\n"
-        "/unsubscribe отписывает пользователя от обновлений\n"
-        "/mal поиск тайтлов MyAnimeList\n"
-        "/mal [manga|anime] *название* быстрый поиск тайтлов MyAnimeList"
+        '/help - выводит это сообщение\n'
+        '/start - регистрирует пользователя\n'
+        '/subscribe - подписывает пользователя на обновления\n'
+        '/subscriptions - возвращает список активных подписок\n'
+        '/unsubscribe - отписывает пользователя от обновлений\n'
+        '/mal - поиск тайтлов MyAnimeList '
+        '(или /mal [manga|anime] *название*)\n'
     )
     return msg.strip()
 
