@@ -211,7 +211,7 @@ async def mal_handler(message: types.Message):
 
 
 @dp.message_handler(state=MalSearch.query)
-async def url_state(message: types.Message, state: FSMContext):
+async def mal_search_query_state(message: types.Message, state: FSMContext):
     text = message.text.strip()
     await state.finish()
 

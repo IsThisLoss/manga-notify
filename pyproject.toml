@@ -52,3 +52,7 @@ include = [
   "manga_notify/**/*.py",
   "manga_notify/**/*.sql"
 ]
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "INFO"

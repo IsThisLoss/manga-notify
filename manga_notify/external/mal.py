@@ -40,7 +40,7 @@ class MyAnimeList:
                 json = await response.json()
                 data = json['data']
 
-        result = []
+        result: typing.List[MyAnimeListItem] = []
         if not data:
             return result
         for item in data:

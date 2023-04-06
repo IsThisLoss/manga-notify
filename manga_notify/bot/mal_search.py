@@ -76,10 +76,16 @@ class MalSearch:
         tasks = []
         if self.MANGA in feed_types:
             logging.info('Launch manga search task')
-            tasks.append(asyncio.create_task(self._mal.find(self.MANGA, text, limit), name=self.MANGA))
+            tasks.append(asyncio.create_task(
+                self._mal.find(self.MANGA, text, limit),
+                name=self.MANGA,
+            ))
         if self.ANIME in feed_types:
             logging.info('Launch anime search task')
-            tasks.append(asyncio.create_task(self._mal.find(self.ANIME, text, limit), name=self.ANIME))
+            tasks.append(asyncio.create_task(
+                self._mal.find(self.ANIME, text, limit),
+                name=self.ANIME,
+            ))
 
         done, _ = await asyncio.wait(tasks)
         for task in done:
