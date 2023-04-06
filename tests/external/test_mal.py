@@ -1,52 +1,42 @@
-import json
-import re
-
 import pytest
-
-from aioresponses import aioresponses
 
 from manga_notify.external import mal
 
 
-SEARCH_URL = re.compile(r'^https://api\.myanimelist\.net/v2/.*$')
-
-
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    'response, expected_url',
+    'response, expected',
     (
         pytest.param(
             {
-                'data': [
-                    {
-                        'node': {
-                            'id': 42,
-                        },
-                    },
-                ],
+                'id': 42,
+                'title': 'Manga Title',
             },
-            'https://myanimelist.net/manga/42',
+            [
+                mal.MyAnimeListItem(
+                    title='Manga Title',
+                    link='https://myanimelist.net/manga/42',
+                ),
+            ],
             id='found',
         ),
         pytest.param(
-            {
-                'data': [],
-            },
             None,
+            [],
             id='not_found',
         ),
     )
 )
 async def test_mal(
     response,
-    expected_url,
+    expected,
+    mal_mock
 ):
     my_anime_list = mal.MyAnimeList()
-    with aioresponses() as mocked:
-        mocked.get(
-            SEARCH_URL,
-            status=200,
-            body=json.dumps(response),
-        )
+
+    if response:
+        mal_mock.add_manga(response['id'], response['title'])
+
+    with mal_mock.mock():
         result = await my_anime_list.find('manga', 'test')
-    assert result == expected_url
+    assert result == expected

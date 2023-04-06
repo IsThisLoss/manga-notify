@@ -5,8 +5,9 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from . import auth
 from . import callback_data
-from . import remind_later
 from . import info_builder
+from . import mal_search
+from . import remind_later
 from .. import dependencies
 from ..drivers import driver_factory
 from ..feed_processing import subscription
@@ -18,7 +19,9 @@ def _make_help():
         "/start регистрирует пользователя\n"
         "/subscribe подписывает пользователя на обновления\n"
         "/subscriptions возвращает список активных подписок\n"
-        "/unsubscribe отписывает пользователя от обновлений"
+        "/unsubscribe отписывает пользователя от обновлений\n"
+        "/mal поиск тайтлов MyAnimeList\n"
+        "/mal [manga|anime] *название* быстрый поиск тайтлов MyAnimeList"
     )
     return msg.strip()
 
@@ -184,3 +187,37 @@ async def later_callback(callback_query: types.CallbackQuery):
     await remind_later.button_callback(deps, user_id, message_id, data)
 
     await callback_query.answer('Готово')
+
+
+class MalSearch(StatesGroup):
+    query = State()
+
+
+@dp.message_handler(commands='mal')
+async def mal_handler(message: types.Message):
+    args = message.get_args()
+
+    if not args:
+        await MalSearch.query.set()
+        await message.reply('Введи название тайтла')
+        return
+
+    searcher = mal_search.MalSearch()
+    msg = await searcher.quick_search(args)
+    await message.reply(
+        msg,
+        parse_mode=types.ParseMode.MARKDOWN,
+    )
+
+
+@dp.message_handler(state=MalSearch.query)
+async def mal_search_query_state(message: types.Message, state: FSMContext):
+    text = message.text.strip()
+    await state.finish()
+
+    searcher = mal_search.MalSearch()
+    msg = await searcher.search(text)
+    await message.reply(
+        msg,
+        parse_mode=types.ParseMode.MARKDOWN,
+    )
