@@ -33,6 +33,7 @@ class Dependencies:
             redis_settings = arq.connections.RedisSettings(
                 host=cfg.redis_host,
                 port=cfg.redis_port,
+                password=cfg.redis_password,
             )
             self._queues = await arq.create_pool(redis_settings)
         assert self._queues

@@ -30,6 +30,7 @@ deps = dependencies.get()
 storage = RedisStorage2(
     host=deps.get_cfg().redis_host,
     port=deps.get_cfg().redis_port,
+    password=deps.get_cfg().redis_password,
     prefix=deps.get_cfg().aiogram_fsm_prefix,
 )
 dp = Dispatcher(deps.get_bot(), storage=storage)

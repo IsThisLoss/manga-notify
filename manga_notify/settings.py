@@ -9,6 +9,7 @@ class Settings(pydantic.BaseSettings):
 
     redis_host: str = 'localhost'       # redis host
     redis_port: int = 6379              # redis port
+    redis_password: typing.Optional[str] = None         # redis password
 
     # postgres connection string
     pg_conn: str = (
