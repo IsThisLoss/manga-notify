@@ -49,4 +49,4 @@ jobs:
           proxy_username: ${{ secrets.PROXY_USERNAME }}
           proxy_key: ${{ secrets.PROXY_KEY }}
           proxy_port: ${{ secrets.PROXY_PORT }}
-          script: cd docker && docker-compose down && TAG=${{ github.ref_name }} docker-compose up -d
+          script: TAG=${{ github.ref_name }} ./deploy.sh
