@@ -15,6 +15,7 @@ def mal_mock():
         def __init__(self):
             self.anime = []
             self.manga = []
+            self.status_code = 200
 
         def _make_node(self, id: int, title: str) -> dict:
             return {
@@ -23,6 +24,9 @@ def mal_mock():
                     'title': title,
                 },
             }
+
+        def set_status_code(self, status_code: int):
+            self.status_code = status_code
 
         def add_manga(self, id: int, title: str):
             self.manga.append(self._make_node(id, title))
@@ -35,14 +39,14 @@ def mal_mock():
             with aioresponses() as mocked:
                 mocked.get(
                     self.MANGA_URL,
-                    status=200,
+                    status=self.status_code,
                     body=json.dumps({
                         'data': ctx.manga,
                     }),
                 )
                 mocked.get(
                     self.ANIME_URL,
-                    status=200,
+                    status=self.status_code,
                     body=json.dumps({
                         'data': ctx.anime,
                     }),

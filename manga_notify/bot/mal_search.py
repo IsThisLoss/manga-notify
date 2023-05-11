@@ -68,6 +68,18 @@ class MalSearch:
         feed_types: typing.Set[str],
         limit: int,
     ) -> str:
+        try:
+            return await self._search_impl(text, feed_types, limit)
+        except Exception as _:  # noqa
+            logging.exception('Mal error')
+        return 'Похоже mal не работает'
+
+    async def _search_impl(
+        self,
+        text: str,
+        feed_types: typing.Set[str],
+        limit: int,
+    ) -> str:
         result = MalSearchResponseBuilder()
 
         if len(text) < self.MIN_TEXT_LEN:
