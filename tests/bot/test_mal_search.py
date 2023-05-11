@@ -82,3 +82,14 @@ async def test_mal_quick_search(text, expected, mal_mock):
         result = await searcher.quick_search(text)
 
     assert result == expected
+
+
+@pytest.mark.asyncio
+async def test_mal_search_error(mal_mock):
+    searcher = mal_search.MalSearch()
+
+    mal_mock.set_status_code(500)
+    with mal_mock.mock():
+        result = await searcher.search('text')
+
+    assert result == 'Похоже mal не работает'
