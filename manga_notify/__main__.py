@@ -7,12 +7,29 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
+import signal
+
 import asyncio
 import argparse
 
-from . import bot
-from . import jobs
-from . import custom
+from . import dependencies
+
+
+async def run_bot():
+    from . import bot
+
+    def _sig_handler(*args):
+        bot.dp.stop_polling()
+
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        signal.signal(sig, _sig_handler)
+
+    await bot.dp.start_polling()
+
+
+async def run_job():
+    from . import jobs
+    await jobs.run()
 
 
 async def main():
@@ -22,15 +39,25 @@ async def main():
     parser.add_argument('--message', nargs='?', help='message for send_message mode')
     args = parser.parse_args()
 
-    if args.mode == 'bot':
-        await bot.dp.start_polling()
-    elif args.mode == 'jobs':
-        await jobs.run()
-    elif args.mode == 'send_message':
-        await custom.send_message(args.user_id, args.message)
-    else:
-        logging.fatal(f'Unknown mode: {args.mode}')
-        exit(1)
+    try:
+        await dependencies.on_startup()
+    except Exception as _:
+        logging.exception('Failed to initialize dependencies')
+        exit(2)
+
+    try:
+        if args.mode == 'bot':
+            await run_bot()
+        elif args.mode == 'jobs':
+            await run_job()
+        elif args.mode == 'send_message':
+            from . import custom
+            await custom.send_message(args.user_id, args.message)
+        else:
+            logging.fatal(f'Unknown mode: {args.mode}')
+            exit(1)
+    finally:
+        await dependencies.on_shutdown()
 
 
 if __name__ == '__main__':
