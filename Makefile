@@ -23,3 +23,6 @@ flake8-check:
 
 tests:
 	. ./tests/init_env.sh && python -m pytest tests
+
+up-requirements:
+	pip-compile --output-file=requirements.txt pyproject.toml

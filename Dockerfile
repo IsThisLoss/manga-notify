@@ -1,4 +1,6 @@
-FROM python:3.8.10-slim
+FROM python:3.11-slim
+
+RUN apt update && apt install -y gcc
 
 # supervisord
 COPY supervisor/supervisord.conf /etc/supervisor/supervisord.conf

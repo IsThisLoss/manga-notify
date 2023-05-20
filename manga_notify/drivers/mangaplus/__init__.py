@@ -78,13 +78,13 @@ class Mangaplus(driver.Driver):
         parsed_items = []
         if new_items:
             feed_data.set_cursor(new_items[0].name)
-            for item in reversed(new_items):
+            for new_item in reversed(new_items):
                 parsed_items.append(driver.ParsingItem(
                     name=self._format_item_name(
                         feed_data.get_title(),
-                        item.name,
+                        new_item.name,
                     ),
-                    link=item.link,
+                    link=new_item.link,
                 ))
 
         return driver.ParsingResult(
