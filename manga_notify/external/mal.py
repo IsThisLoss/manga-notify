@@ -1,7 +1,7 @@
 import dataclasses
 import typing
 
-import aiohttp
+from .. import dependencies
 
 
 @dataclasses.dataclass
@@ -30,15 +30,14 @@ class MyAnimeList:
             'q': title[:64],
             'limit': limit,
         }
-        async with aiohttp.ClientSession() as client:
-            async with client.get(
-                url,
-                params=params,
-                headers=headers,
-            ) as response:
-                response.raise_for_status()
-                json = await response.json()
-                data = json['data']
+        client = await dependencies.get().get_http_client()
+        async with client.get(
+            url,
+            params=params,
+            headers=headers,
+        ) as response:
+            json = await response.json()
+            data = json['data']
 
         result: typing.List[MyAnimeListItem] = []
         if not data:

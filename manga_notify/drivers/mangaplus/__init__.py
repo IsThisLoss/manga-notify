@@ -1,8 +1,8 @@
 import typing
-import aiohttp
 
 from . import response_pb2
 from .. import driver
+from ... import dependencies
 from ...database import feed_storage
 
 
@@ -51,14 +51,14 @@ class Mangaplus(driver.Driver):
             'User-Agent': UA,
         }
 
-        async with aiohttp.ClientSession() as client:
-            url = self._get_url(feed_data)
-            async with client.get(
-                url,
-                headers=headers,
-            ) as response:
-                response.raise_for_status()
-                raw_data = await response.read()
+        url = self._get_url(feed_data)
+
+        client = await dependencies.get().get_http_client()
+        async with client.get(
+            url,
+            headers=headers,
+        ) as response:
+            raw_data = await response.read()
 
         data = response_pb2.Response.FromString(raw_data)
 

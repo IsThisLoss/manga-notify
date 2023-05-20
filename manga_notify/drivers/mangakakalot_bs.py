@@ -1,8 +1,7 @@
-import aiohttp
-
 from bs4 import BeautifulSoup
 
 from . import driver
+from .. import dependencies
 from ..database import feed_storage
 
 
@@ -20,11 +19,9 @@ class MangakakalotBs(driver.Driver):
         self,
         feed_data: feed_storage.FeedData,
     ) -> driver.ParsingResult:
-
-        async with aiohttp.ClientSession() as client:
-            async with client.get(feed_data.get_url()) as response:
-                response.raise_for_status()
-                data = await response.text()
+        client = await dependencies.get().get_http_client()
+        async with client.get(feed_data.get_url()) as response:
+            data = await response.text()
 
         soup = BeautifulSoup(data, 'html.parser')
 

@@ -1,8 +1,7 @@
-import aiohttp
-
 import xml.etree.ElementTree as ET
 
 from . import driver
+from .. import dependencies
 from ..database import feed_storage
 
 
@@ -66,14 +65,14 @@ class BasicRss(driver.Driver):
             'User-Agent': UA,
         }
 
-        async with aiohttp.ClientSession() as client:
-            url = self._get_url(feed_data)
-            async with client.get(
-                url,
-                headers=headers,
-            ) as response:
-                response.raise_for_status()
-                data = await response.text()
+        url = self._get_url(feed_data)
+
+        client = await dependencies.get().get_http_client()
+        async with client.get(
+            url,
+            headers=headers,
+        ) as response:
+            data = await response.text()
 
         root = ET.fromstring(data)
 

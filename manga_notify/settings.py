@@ -25,6 +25,9 @@ class Settings(pydantic.BaseSettings):
     # Token to access erai-raws
     erai_raws_token: typing.Optional[str] = None
 
+    # Outgoing http requests timeout in seconds
+    http_client_timeout: float = 30
+
     class Config:
         env_file = '.env'
 
