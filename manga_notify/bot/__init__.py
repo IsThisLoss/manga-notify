@@ -1,8 +1,12 @@
-from aiogram import Dispatcher, types, Router
+from aiogram import Dispatcher, Router
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.redis import RedisStorage
+from aiogram.types.inline_keyboard_markup import InlineKeyboardMarkup
+from aiogram.types.inline_keyboard_button import InlineKeyboardButton
+from aiogram.types.callback_query import CallbackQuery
+from aiogram.types.message import Message
 
 from . import auth
 from . import callback_data
@@ -32,8 +36,15 @@ router = Router()
 router.message.middleware.register(auth.AuthMiddleware())
 
 
+async def get_user_id(message: Message):
+    if not message.from_user:
+        await message.reply('Бот может работать только с пользователями')
+        return None
+    return message.from_user.id
+
+
 @router.message(commands='start')
-async def start_handler(message: types.Message):
+async def start_handler(message: Message):
     if not message.from_user:
         await message.reply('Бот может работать только с пользователями')
         return
@@ -51,7 +62,7 @@ async def start_handler(message: types.Message):
 
 
 @router.message(state='*', commands='cancel')
-async def cancel_handler(message: types.Message, state: FSMContext):
+async def cancel_handler(message: Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
         return
@@ -60,12 +71,12 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
 
 @router.message(commands='help')
-async def help_handler(message: types.Message):
+async def help_handler(message: Message):
     await message.reply(_make_help())
 
 
 @router.message(commands='subscriptions')
-async def subscriptions_handler(message: types.Message):
+async def subscriptions_handler(message: Message):
     if not message.from_user:
         await message.reply('Бот может работать только с пользователями')
         return
@@ -91,24 +102,27 @@ class NewSubscription(StatesGroup):
 
 
 @router.message(commands='subscribe')
-async def subscribe_handler(message: types.Message, state: FSMContext):
+async def subscribe_handler(message: Message, state: FSMContext):
     await state.set_state(NewSubscription.url)
     await message.reply('Введи ссылку на фид')
 
 
 @router.message(state=NewSubscription.url)
-async def url_state(message: types.Message, state: FSMContext):
+async def url_state(message: Message, state: FSMContext):
+    user_id = get_user_id(message)
+    if not user_id:
+        return
     factory = driver_factory.DriverFactory()
-    url = message.text.strip()
+    url = (message.text or '').strip()
     driver = factory.find_driver(url)
-    await state.finish()
+    await state.clear()
     if not driver:
         await message.reply('Кажется, я еще не умею обрабатывать такие ссылки')
         return
     async with deps.get_db() as db:
         user_subscription = subscription.UserSubscription(db)
         is_subscribed = await user_subscription.subscribe(
-            str(message.from_id),
+            str(user_id),
             driver,
             url,
         )
@@ -119,8 +133,11 @@ async def url_state(message: types.Message, state: FSMContext):
 
 
 @router.message(commands='unsubscribe')
-async def unsubscribe_hander(message: types.Message):
-    chat_id = str(message.from_id)
+async def unsubscribe_hander(message: Message):
+    user_id = get_user_id(message)
+    if not user_id:
+        return
+    chat_id = str(user_id)
     async with deps.get_db() as db:
         user_subscription = subscription.UserSubscription(db)
         feeds = await user_subscription.get_user_feeds(chat_id)
@@ -129,17 +146,18 @@ async def unsubscribe_hander(message: types.Message):
         await message.reply('Нет активных подписок')
         return
 
-    keyboard_markup = types.InlineKeyboardMarkup(row_width=1)
+    buttons = []
     for feed in feeds:
         data = callback_data.CallbackData(
             method=callback_data.Methods.UNSUBSCRIBE,
             payload={'id': feed.get_id()},
         )
         text = feed.get_title() or feed.get_url()
-        keyboard_markup.add(types.InlineKeyboardButton(
-            text,
+        buttons.append(InlineKeyboardButton(
+            text=text,
             callback_data=data.serialize(),
         ))
+    keyboard_markup = InlineKeyboardMarkup(inline_keyboard=buttons)
     await message.reply(
         'Выбери фид от которого нужно отписаться',
         reply_markup=keyboard_markup
@@ -149,7 +167,7 @@ async def unsubscribe_hander(message: types.Message):
 @router.callback_query(
     callback_data.create_matcher(callback_data.Methods.UNSUBSCRIBE),
 )
-async def unsubscribe_callback(callback_query: types.CallbackQuery):
+async def unsubscribe_callback(callback_query: CallbackQuery):
     data = callback_data.parse(callback_query.data)
     if not data:
         await callback_query.answer('Что-то пошло не так')
@@ -168,19 +186,20 @@ async def unsubscribe_callback(callback_query: types.CallbackQuery):
         )
         if is_unsubscribed:
             msg = 'Вы успешно отписаны'
-    await callback_query.message.edit_text(
-        msg,
-        reply_markup=types.InlineKeyboardMarkup(),
-    )
+    if callback_query.message:
+        await callback_query.message.edit_text(
+            msg,
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[]),
+        )
     await callback_query.answer('Готово')
 
 
 @router.callback_query(
     callback_data.create_matcher(callback_data.Methods.LATER)
 )
-async def later_callback(callback_query: types.CallbackQuery):
+async def later_callback(callback_query: CallbackQuery):
     data = callback_data.parse(callback_query.data)
-    if not data:
+    if not data or not callback_query.message:
         await callback_query.answer('Что-то пошло не так')
         return
 
@@ -197,32 +216,32 @@ class MalSearch(StatesGroup):
 
 
 @router.message(commands='mal')
-async def mal_handler(message: types.Message):
-    args = message.get_args()
+async def mal_handler(message: Message, state: FSMContext):
+    args = (message.text or '').split()
 
     if not args:
-        await MalSearch.query.set()
+        await state.set_state(MalSearch.query)
         await message.reply('Введи название тайтла')
         return
 
     searcher = mal_search.MalSearch()
-    msg = await searcher.quick_search(args)
+    msg = await searcher.quick_search(args[1])
     await message.reply(
         msg,
-        parse_mode=types.ParseMode.MARKDOWN,
+        parse_mode=ParseMode.MARKDOWN,
     )
 
 
 @router.message(state=MalSearch.query)
-async def mal_search_query_state(message: types.Message, state: FSMContext):
-    text = message.text.strip()
-    await state.finish()
+async def mal_search_query_state(message: Message, state: FSMContext):
+    text = (message.text or '').strip()
+    await state.clear()
 
     searcher = mal_search.MalSearch()
     msg = await searcher.search(text)
     await message.reply(
         msg,
-        parse_mode=types.ParseMode.MARKDOWN,
+        parse_mode=ParseMode.MARKDOWN,
     )
 
 
