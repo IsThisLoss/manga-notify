@@ -5,6 +5,8 @@ import aiohttp
 import arq
 import asyncpg
 
+from redis.asyncio.client import Redis
+
 from . import settings
 from . import database
 
@@ -16,10 +18,12 @@ class Dependencies:
 
         self._http_client = None
         self._db_pool = None
+        self._redis = None
         self._queues = None
 
     async def _on_startup(self):
         await self.get_db_pool()
+        await self.get_redis()
         await self.get_queues()
         await self.get_http_client()
 
@@ -42,6 +46,17 @@ class Dependencies:
 
         assert self._db_pool
         return self._db_pool
+
+    async def get_redis(self) -> Redis:
+        if not self._redis:
+            cfg = self.get_cfg()
+            self._redis = Redis(
+                host=cfg.redis_host,
+                port=cfg.redis_port,
+                password=cfg.redis_password,
+            )
+            await self._redis.ping()
+        return self._redis
 
     async def get_queues(self) -> arq.connections.ArqRedis:
         if not self._queues:

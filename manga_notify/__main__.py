@@ -9,8 +9,8 @@ logging.basicConfig(
 
 import signal
 
-import asyncio
 import argparse
+import asyncio
 
 from . import dependencies
 

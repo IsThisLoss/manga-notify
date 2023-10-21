@@ -1,7 +1,8 @@
-from aiogram import Dispatcher, types
-from aiogram.contrib.fsm_storage.redis import RedisStorage2
-from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram import Dispatcher, types, Router
+from aiogram.enums import ParseMode
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.storage.redis import RedisStorage
 
 from . import auth
 from . import callback_data
@@ -27,21 +28,19 @@ def _make_help():
 
 
 deps = dependencies.get()
-storage = RedisStorage2(
-    host=deps.get_cfg().redis_host,
-    port=deps.get_cfg().redis_port,
-    password=deps.get_cfg().redis_password,
-    prefix=deps.get_cfg().aiogram_fsm_prefix,
-)
-dp = Dispatcher(deps.get_bot(), storage=storage)
-dp.middleware.setup(auth.AuthMiddleware())
+router = Router()
+router.message.middleware.register(auth.AuthMiddleware())
 
 
-@dp.message_handler(commands='start')
+@router.message(commands='start')
 async def start_handler(message: types.Message):
+    if not message.from_user:
+        await message.reply('Бот может работать только с пользователями')
+        return
+
     async with deps.get_db() as db:
         res = await db.users.register(
-            str(message.from_id),
+            str(message.from_user.id),
             str(message.from_user.username),
         )
 
@@ -51,25 +50,28 @@ async def start_handler(message: types.Message):
         await message.reply('Произошла ошибка при регистрации')
 
 
-@dp.message_handler(state='*', commands='cancel')
+@router.message(state='*', commands='cancel')
 async def cancel_handler(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
         return
-    await state.finish()
+    await state.clear()
     await message.reply('Отменено')
 
 
-@dp.message_handler(commands='help')
+@router.message(commands='help')
 async def help_handler(message: types.Message):
     await message.reply(_make_help())
 
 
-@dp.message_handler(commands='subscriptions')
+@router.message(commands='subscriptions')
 async def subscriptions_handler(message: types.Message):
+    if not message.from_user:
+        await message.reply('Бот может работать только с пользователями')
+        return
     async with deps.get_db() as db:
         user_subscription = subscription.UserSubscription(db)
-        feeds = await user_subscription.get_user_feeds(str(message.from_id))
+        feeds = await user_subscription.get_user_feeds(str(message.from_user.id))
     data = []
     for feed in feeds:
         data.append(info_builder.build_feed_info(feed))
@@ -79,7 +81,7 @@ async def subscriptions_handler(message: types.Message):
         msg = f'Активные подписки:\n{data_str}'
     await message.reply(
         msg,
-        types.ParseMode.MARKDOWN,
+        ParseMode.MARKDOWN,
         disable_web_page_preview=True,
     )
 
@@ -88,13 +90,13 @@ class NewSubscription(StatesGroup):
     url = State()
 
 
-@dp.message_handler(commands='subscribe')
-async def subscribe_handler(message: types.Message):
-    await NewSubscription.url.set()
+@router.message(commands='subscribe')
+async def subscribe_handler(message: types.Message, state: FSMContext):
+    await state.set_state(NewSubscription.url)
     await message.reply('Введи ссылку на фид')
 
 
-@dp.message_handler(state=NewSubscription.url)
+@router.message(state=NewSubscription.url)
 async def url_state(message: types.Message, state: FSMContext):
     factory = driver_factory.DriverFactory()
     url = message.text.strip()
@@ -116,7 +118,7 @@ async def url_state(message: types.Message, state: FSMContext):
         await message.reply('Не удалось создать фид')
 
 
-@dp.message_handler(commands='unsubscribe')
+@router.message(commands='unsubscribe')
 async def unsubscribe_hander(message: types.Message):
     chat_id = str(message.from_id)
     async with deps.get_db() as db:
@@ -144,7 +146,7 @@ async def unsubscribe_hander(message: types.Message):
     )
 
 
-@dp.callback_query_handler(
+@router.callback_query(
     callback_data.create_matcher(callback_data.Methods.UNSUBSCRIBE),
 )
 async def unsubscribe_callback(callback_query: types.CallbackQuery):
@@ -173,7 +175,7 @@ async def unsubscribe_callback(callback_query: types.CallbackQuery):
     await callback_query.answer('Готово')
 
 
-@dp.callback_query_handler(
+@router.callback_query(
     callback_data.create_matcher(callback_data.Methods.LATER)
 )
 async def later_callback(callback_query: types.CallbackQuery):
@@ -194,7 +196,7 @@ class MalSearch(StatesGroup):
     query = State()
 
 
-@dp.message_handler(commands='mal')
+@router.message(commands='mal')
 async def mal_handler(message: types.Message):
     args = message.get_args()
 
@@ -211,7 +213,7 @@ async def mal_handler(message: types.Message):
     )
 
 
-@dp.message_handler(state=MalSearch.query)
+@router.message(state=MalSearch.query)
 async def mal_search_query_state(message: types.Message, state: FSMContext):
     text = message.text.strip()
     await state.finish()
@@ -222,3 +224,13 @@ async def mal_search_query_state(message: types.Message, state: FSMContext):
         msg,
         parse_mode=types.ParseMode.MARKDOWN,
     )
+
+
+async def start_polling():
+    redis = await deps.get_redis()
+    storage = RedisStorage(
+        redis=redis,
+    )
+    bot = deps.get_bot()
+    dp = Dispatcher(storage=storage)
+    await dp.start_polling(bot)
