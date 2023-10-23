@@ -19,6 +19,11 @@ async def run_bot():
     await bot.start_polling()
 
 
+async def run_bot_webhook():
+    from . import bot
+    await bot.start_webhook()
+
+
 async def run_job():
     from . import jobs
     await jobs.run()
@@ -40,6 +45,8 @@ async def main():
     try:
         if args.mode == 'bot':
             await run_bot()
+        elif args.mode == 'bot-webhook':
+            await run_bot_webhook()
         elif args.mode == 'jobs':
             await run_job()
         elif args.mode == 'send_message':
