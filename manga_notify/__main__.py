@@ -7,7 +7,6 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-import signal
 
 import argparse
 import asyncio
@@ -17,14 +16,7 @@ from . import dependencies
 
 async def run_bot():
     from . import bot
-
-    def _sig_handler(*args):
-        bot.dp.stop_polling()
-
-    for sig in (signal.SIGTERM, signal.SIGINT):
-        signal.signal(sig, _sig_handler)
-
-    await bot.dp.start_polling()
+    await bot.start_polling()
 
 
 async def run_job():
