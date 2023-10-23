@@ -99,11 +99,13 @@ async def unsubscribe_hander(
             payload={'id': feed.get_id()},
         )
         text = feed.get_title() or feed.get_url()
-        buttons.append(types.InlineKeyboardButton(
-            text=text,
-            callback_data=data.serialize(),
-        ))
-    keyboard_markup = types.InlineKeyboardMarkup(inline_keyboard=[buttons])
+        buttons.append([
+            types.InlineKeyboardButton(
+                text=text,
+                callback_data=data.serialize(),
+            ),
+        ])
+    keyboard_markup = types.InlineKeyboardMarkup(inline_keyboard=buttons)
     await message.reply(
         'Выбери фид от которого нужно отписаться',
         reply_markup=keyboard_markup

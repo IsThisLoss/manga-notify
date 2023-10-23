@@ -9,14 +9,14 @@ from .. import dependencies
 def build_mal_keyboard(
     mal_url: str,
 ) -> types.InlineKeyboardMarkup:
-    keys = []
-    keys.append(
+    buttons = []
+    buttons.append(
         types.InlineKeyboardButton(
             text='MyAnimeList',
             url=mal_url,
         )
     )
-    return types.InlineKeyboardMarkup(inline_keyboard=[keys])
+    return types.InlineKeyboardMarkup(inline_keyboard=[buttons])
 
 
 async def job(ctx, user_id: str, message: str, extra: dict):

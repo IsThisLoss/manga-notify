@@ -1,6 +1,6 @@
 from aiogram import enums
-from aiogram import types
 from aiogram import filters
+from aiogram import types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
@@ -17,7 +17,7 @@ class MalSearch(StatesGroup):
 
 @router.message(filters.Command('mal'))
 async def mal_handler(message: types.Message, state: FSMContext):
-    args = (message.text or '').split()
+    args = (message.text or '').split()[1:]
 
     if not args:
         await state.set_state(MalSearch.query)
@@ -25,7 +25,7 @@ async def mal_handler(message: types.Message, state: FSMContext):
         return
 
     searcher = mal_search.MalSearch()
-    msg = await searcher.quick_search(args[1])
+    msg = await searcher.quick_search(' '.join(args))
     await message.reply(
         msg,
         parse_mode=enums.ParseMode.MARKDOWN,
