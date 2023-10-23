@@ -56,10 +56,15 @@ pydantic==2.1.1
     # via
     #   aiogram
     #   manga-notify (pyproject.toml)
+    #   pydantic-settings
 pydantic-core==2.4.0
     # via pydantic
-python-dotenv==1.0.0
+pydantic-settings==2.0.3
     # via manga-notify (pyproject.toml)
+python-dotenv==1.0.0
+    # via
+    #   manga-notify (pyproject.toml)
+    #   pydantic-settings
 redis[hiredis]==4.5.5
     # via arq
 soupsieve==2.3.2.post1
