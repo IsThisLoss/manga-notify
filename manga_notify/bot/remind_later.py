@@ -15,7 +15,7 @@ _SATURDAY_MORNING = 'SM'
 
 
 def build_remind_keyboard() -> types.InlineKeyboardMarkup:
-    keyboard_markup = types.InlineKeyboardMarkup(row_width=1)
+    keys = []
     method = callback_data.Methods.LATER
     buttons = (
         ('Завтра утром', _TOMORROW_MOGRIN),
@@ -23,16 +23,16 @@ def build_remind_keyboard() -> types.InlineKeyboardMarkup:
         ('В субботу утром', _SATURDAY_MORNING),
     )
     for text, when in buttons:
-        keyboard_markup.add(
+        keys.append(
             types.InlineKeyboardButton(
-                text,
+                text=text,
                 callback_data=callback_data.CallbackData(
                     method=method,
                     payload={'when': when},
                 ).serialize()
             ),
         )
-    return keyboard_markup
+    return types.InlineKeyboardMarkup(inline_keyboard=[keys])
 
 
 def find_next_saturday(now: datetime) -> datetime:

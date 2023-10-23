@@ -1,3 +1,4 @@
+from aiogram import enums
 from aiogram import types
 
 # from ..bot import remind_later
@@ -5,15 +6,17 @@ from aiogram import types
 from .. import dependencies
 
 
-def build_mal_keyboard(mal_url: str):
-    keyboard_markup = types.InlineKeyboardMarkup(row_width=1)
-    keyboard_markup.add(
+def build_mal_keyboard(
+    mal_url: str,
+) -> types.InlineKeyboardMarkup:
+    buttons = []
+    buttons.append(
         types.InlineKeyboardButton(
-            'MyAnimeList',
+            text='MyAnimeList',
             url=mal_url,
         )
     )
-    return keyboard_markup
+    return types.InlineKeyboardMarkup(inline_keyboard=[buttons])
 
 
 async def job(ctx, user_id: str, message: str, extra: dict):
@@ -27,6 +30,6 @@ async def job(ctx, user_id: str, message: str, extra: dict):
     await bot.send_message(
         chat_id=user_id,
         text=message,
-        parse_mode=types.ParseMode.MARKDOWN,
+        parse_mode=enums.ParseMode.MARKDOWN,
         reply_markup=keyboard,
     )

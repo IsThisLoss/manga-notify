@@ -1,10 +1,10 @@
 import typing
 from functools import lru_cache
 
-import pydantic
+import pydantic_settings
 
 
-class Settings(pydantic.BaseSettings):
+class Settings(pydantic_settings.BaseSettings):
     tg_token: str                       # telegram bot token
 
     redis_host: str = 'localhost'       # redis host

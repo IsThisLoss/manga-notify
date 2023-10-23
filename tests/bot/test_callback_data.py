@@ -38,7 +38,11 @@ def test_matcher(matcher_method, is_matched):
         payload={},
     )
     serialized = data.serialize()
-    query = types.CallbackQuery()
-    query.data = serialized
+    query = types.CallbackQuery(
+        id='1',
+        from_user=types.User(id=1, is_bot=False, first_name='user'),
+        chat_instance='chat_instance',
+        data=serialized,
+    )
     matcher = callback_data.create_matcher(matcher_method)
     assert matcher(query) == is_matched
