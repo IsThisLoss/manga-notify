@@ -28,6 +28,8 @@ class Settings(pydantic_settings.BaseSettings):
     # Outgoing http requests timeout in seconds
     http_client_timeout: float = 30
 
+    # Host for incoming request from reverse proxy
+    web_server_host: str = '127.0.0.1'
     # Port for incoming request from reverse proxy
     web_server_port: int = 8080
     # Path to webhook route, on which Telegram will send requests
