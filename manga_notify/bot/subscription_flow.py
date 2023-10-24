@@ -25,9 +25,9 @@ async def subscriptions_handler(
     deps: dependencies.Dependencies,
     user_id: str,
 ):
-    async with deps.get_db() as db:
-        user_subscription = subscription.UserSubscription(db)
-        feeds = await user_subscription.get_user_feeds(user_id)
+    db = await deps.get_db()
+    user_subscription = subscription.UserSubscription(db)
+    feeds = await user_subscription.get_user_feeds(user_id)
     data = []
     for feed in feeds:
         data.append(info_builder.build_feed_info(feed))
@@ -64,17 +64,17 @@ async def url_state(
         await message.reply('Кажется, я еще не умею обрабатывать такие ссылки')
         return
 
-    async with deps.get_db() as db:
-        user_subscription = subscription.UserSubscription(db)
-        is_subscribed = await user_subscription.subscribe(
-            str(user_id),
-            driver,
-            url,
-        )
-        if is_subscribed:
-            await message.reply('Вы успешно подписаны')
-            return
-        await message.reply('Не удалось создать фид')
+    db = await deps.get_db()
+    user_subscription = subscription.UserSubscription(db)
+    is_subscribed = await user_subscription.subscribe(
+        str(user_id),
+        driver,
+        url,
+    )
+    if is_subscribed:
+        await message.reply('Вы успешно подписаны')
+        return
+    await message.reply('Не удалось создать фид')
 
 
 @router.message(filters.Command('unsubscribe'))
@@ -84,9 +84,9 @@ async def unsubscribe_hander(
     user_id: str
 ):
     chat_id = str(user_id)
-    async with deps.get_db() as db:
-        user_subscription = subscription.UserSubscription(db)
-        feeds = await user_subscription.get_user_feeds(chat_id)
+    db = await deps.get_db()
+    user_subscription = subscription.UserSubscription(db)
+    feeds = await user_subscription.get_user_feeds(chat_id)
 
     if not feeds:
         await message.reply('Нет активных подписок')
@@ -130,14 +130,14 @@ async def unsubscribe_callback(
     user_id = str(callback_query.from_user.id)
 
     msg = 'Не удалось найти фид'
-    async with deps.get_db() as db:
-        user_subscription = subscription.UserSubscription(db)
-        is_unsubscribed = await user_subscription.unsubscribe(
-            user_id,
-            feed_id,
-        )
-        if is_unsubscribed:
-            msg = 'Вы успешно отписаны'
+    db = await deps.get_db()
+    user_subscription = subscription.UserSubscription(db)
+    is_unsubscribed = await user_subscription.unsubscribe(
+        user_id,
+        feed_id,
+    )
+    if is_unsubscribed:
+        msg = 'Вы успешно отписаны'
     if callback_query.message:
         await callback_query.message.edit_text(
             msg,

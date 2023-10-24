@@ -23,11 +23,11 @@ class AuthMiddleware(BaseMiddleware):
         deps: dependencies.Dependencies,
         user_id: str,
     ) -> bool:
-        async with deps.get_db() as db:
-            user_exists = await db.users.exists(user_id)
-            if not user_exists:
-                logging.info(f'User {user_id} was not found')
-                return False
+        db = await deps.get_db()
+        user_exists = await db.users.exists(user_id)
+        if not user_exists:
+            logging.info(f'User {user_id} was not found')
+            return False
         return True
 
 

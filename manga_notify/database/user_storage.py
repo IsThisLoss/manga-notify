@@ -23,7 +23,10 @@ class UserInfo:
 
 
 class UserStorage:
-    def __init__(self, conn: asyncpg.Connection):
+    def __init__(
+        self,
+        conn: typing.Union[asyncpg.Pool, asyncpg.Connection],
+    ):
         self._connection = conn
 
     async def exists(self, user_id: str) -> bool:
