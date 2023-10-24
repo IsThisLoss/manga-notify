@@ -1,8 +1,11 @@
+import logging
+
 from aiogram import Dispatcher
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.webhook import aiohttp_server
 from aiohttp import web
 import aiogram
+import asyncio
 
 from . import basic_commands, subscription_flow, mal_search_flow
 from .. import dependencies
@@ -54,4 +57,21 @@ async def start_webhook():
     webhook_requests_handler.register(app, path=cfg.webhook_path)
     aiohttp_server.setup_application(app, dp, bot=bot)
 
-    web.run_app(app, host='127.0.0.1', port=cfg.web_server_port)
+    runner = web.AppRunner(app=app)
+    await runner.setup()
+    site = web.TCPSite(
+        runner=runner,
+        host=cfg.web_server_host,
+        port=cfg.web_server_port,
+    )
+    await site.start()
+
+    logging.info(
+        f'Web server started {cfg.web_server_host}:{cfg.web_server_port}'
+    )
+
+    try:
+        while True:
+            await asyncio.sleep(3600)
+    finally:
+        await runner.cleanup()
