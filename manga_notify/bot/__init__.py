@@ -35,10 +35,16 @@ async def start_polling():
 async def on_startup(bot: aiogram.Bot) -> None:
     deps = dependencies.get()
     cfg = deps.get_cfg()
+    logging.info(f'Set webhook {cfg.base_webhook_url}{cfg.webhook_path}')
     await bot.set_webhook(
         f'{cfg.base_webhook_url}{cfg.webhook_path}',
         secret_token=cfg.webhook_secret,
     )
+
+
+async def on_shutdown(bot: aiogram.Bot) -> None:
+    await bot.delete_webhook()
+    logging.info('Delete webhook')
 
 
 async def start_webhook():
@@ -46,6 +52,8 @@ async def start_webhook():
     cfg = deps.get_cfg()
 
     dp = await _make_dispatcher(deps)
+    dp.startup.register(on_startup)
+    dp.shutdown.register(on_shutdown)
     bot = deps.get_bot()
 
     app = web.Application()
