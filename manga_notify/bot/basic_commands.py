@@ -17,8 +17,8 @@ async def start_handler(
     user_id: str,
     login: str,
 ):
-    async with deps.get_db() as db:
-        res = await db.users.register(user_id, login)
+    db = await deps.get_db()
+    res = await db.users.register(user_id, login)
 
     if res is True:
         await message.reply('Вы успешно зарегистрированы!')

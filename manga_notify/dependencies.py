@@ -1,5 +1,3 @@
-import contextlib
-
 import aiogram
 import aiohttp
 import arq
@@ -75,12 +73,10 @@ class Dependencies:
         assert self._bot
         return self._bot
 
-    @contextlib.asynccontextmanager
     async def get_db(self):
         pool = await self.get_db_pool()
         assert pool
-        async with pool.acquire() as conn:
-            yield database.database.DataBase(conn)
+        return database.database.DataBase(pool)
 
     async def get_http_client(self) -> aiohttp.ClientSession:
         if not self._http_client:

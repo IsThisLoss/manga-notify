@@ -64,7 +64,10 @@ class FeedData:
 
 
 class FeedStorage:
-    def __init__(self, conn: asyncpg.Connection):
+    def __init__(
+        self,
+        conn: typing.Union[asyncpg.Pool, asyncpg.Connection],
+    ):
         self._connection = conn
 
     async def get_all(self) -> typing.List[FeedData]:
