@@ -3,7 +3,6 @@ services:
   manga-notify:
     build: .
     container_name: manga-notify
-    network_mode: host
     environment:
       TG_TOKEN: "${TG_TOKEN}"
       PARSING_INTERVAL: "${PARSING_INTERVAL:-15}"
@@ -11,14 +10,16 @@ services:
 
   redis:
     image: redis:alpine
-    network_mode: host
+    ports:
+      - "6379:6379"
     restart: on-failure
     volumes:
       - ./volumes/redis:/data
 
   postgres:
     image: postgres:14
-    network_mode: host
+    ports:
+      - "5432:5432"
     restart: on-failure
     environment:
       POSTGRES_USER: manga_notify
