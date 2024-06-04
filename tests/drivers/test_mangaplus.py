@@ -9,8 +9,8 @@ import manga_notify.drivers.mangaplus.response_pb2 as pb
 
 FEED_URL = 'https://mangaplus.shueisha.co.jp/titles/100191'
 MOCK_URL = (
-    'https://jumpg-webapi.tokyo-cdn.com/api/'
-    'title_detailV2?title_id=100191'
+    'https://jumpg-webapi.tokyo-cdn.com/api/title_detailV3'
+    '?title_id=100191'
 )
 
 MOCK_DATA = pb.Response(
