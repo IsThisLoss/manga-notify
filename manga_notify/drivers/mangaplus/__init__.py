@@ -14,8 +14,8 @@ UA = (
 
 class Mangaplus(driver.Driver):
     _API_URL = (
-        'https://jumpg-webapi.tokyo-cdn.com/api/'
-        'title_detailV2?title_id={manga_id}'
+        'https://jumpg-webapi.tokyo-cdn.com/api/title_detailV3'
+        '?title_id={manga_id}'
     )
 
     _CHAPTER_URL = (
@@ -57,6 +57,7 @@ class Mangaplus(driver.Driver):
         async with client.get(
             url,
             headers=headers,
+            ssl=False,
         ) as response:
             raw_data = await response.read()
 
