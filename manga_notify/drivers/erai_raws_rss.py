@@ -32,7 +32,9 @@ class EraiRawsRss(BasicRss):
         return str(parts[0:idx]).strip()
 
     def _filter_item(self, item: driver.ParsingItem) -> bool:
-        is_match = 'Torrent' in item.name
+        name = item.name.lower()
+        is_match = 'torrent' in name and 'airing' in name
+        is_match = is_match and ('us' in name or 'ru' in name)
         return not is_match
 
     def _get_item(
