@@ -19,7 +19,7 @@ class EraiRawsRss(BasicRss):
 
     def _get_url(self, feed_data: feed_storage.FeedData) -> str:
         url = feed_data.get_url()
-        tail = f'feed/?{self._token}'
+        tail = f'feed/?token={self._token}'
         if url[-1] != '/':
             return url + '/' + tail
         return url + tail
