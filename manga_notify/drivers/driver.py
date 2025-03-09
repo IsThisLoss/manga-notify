@@ -14,6 +14,7 @@ class DriverType(str):
     ChapmanganatoBs = 'chapmanganato_bs'
     EraiRawsRss = 'erai_raws_rss'
     Mangaplus = 'mangaplus'
+    WeebCentralRss = 'weebcentral_rss'
 
 
 @dataclasses.dataclass(frozen=True, order=True)
