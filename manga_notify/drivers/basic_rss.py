@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 import xml.etree.ElementTree as ET
 
 from . import driver
@@ -61,11 +63,14 @@ class BasicRss(driver.Driver):
         self,
         feed_data: feed_storage.FeedData,
     ) -> driver.ParsingResult:
+        url = self._get_url(feed_data)
+        host = urlparse(url).netloc
+
         headers = {
             'User-Agent': UA,
+            'Accept': '*/*',
+            'Host': host,
         }
-
-        url = self._get_url(feed_data)
 
         client = await dependencies.get().get_http_client()
         async with client.get(
