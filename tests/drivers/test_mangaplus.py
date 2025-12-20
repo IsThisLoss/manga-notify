@@ -31,6 +31,48 @@ MOCK_DATA = pb.Response(
     )
 )
 
+MOCK_DATA_ONLY_FIRST_CHAPTER_LIST = pb.Response(
+    success_result=pb.SuccessResult(
+        title_detail=pb.TitleDetailView(
+            title=pb.Title(
+                name='Oshi no Ko',
+            ),
+            chapters=pb.ChaptersView(
+                first_chapter_list=[
+                    pb.Chapter(
+                        chapter_id=1015784,
+                        sub_title='Chapter 113: COMMERCIAL WORK',
+                    )
+                ],
+            ),
+        )
+    )
+)
+
+MOCK_DATA_BOTH_CHAPTER_LIST = pb.Response(
+    success_result=pb.SuccessResult(
+        title_detail=pb.TitleDetailView(
+            title=pb.Title(
+                name='Oshi no Ko',
+            ),
+            chapters=pb.ChaptersView(
+                first_chapter_list=[
+                    pb.Chapter(
+                        chapter_id=1015783,
+                        sub_title='Chapter 112',
+                    )
+                ],
+                last_chapter_list=[
+                    pb.Chapter(
+                        chapter_id=1015784,
+                        sub_title='Chapter 113: COMMERCIAL WORK',
+                    )
+                ],
+            ),
+        )
+    )
+)
+
 TITLE = 'Oshi no Ko Chapter 113: COMMERCIAL WORK'
 URL = 'https://mangaplus.shueisha.co.jp/viewer/1015784'
 CURSOR = 'Chapter 113: COMMERCIAL WORK'
@@ -78,3 +120,39 @@ async def test_mangaplus(
 
     assert parsing_result.feed_data.get_cursor() == CURSOR
     assert parsing_result.items == expected_items
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    'mock_data',
+    (
+        pytest.param(
+            MOCK_DATA_ONLY_FIRST_CHAPTER_LIST,
+            id='only_first_chapter_list',
+        ),
+        pytest.param(
+            MOCK_DATA_BOTH_CHAPTER_LIST,
+            id='both_chapter_list',
+        ),
+    )
+)
+async def test_mangaplus_with_first_chapters(
+    mock_data,
+):
+    driver = mangaplus.Mangaplus()
+    feed_data = feed_storage.FeedData(
+        id=1,
+        driver='mangaplus',
+        url=FEED_URL,
+        cursor='Chapter 112',
+    )
+
+    with aioresponses() as mocked:
+        mocked.get(
+            MOCK_URL,
+            status=200,
+            body=mock_data.SerializeToString(),
+        )
+        parsing_result = await driver.parse(feed_data)
+
+    assert parsing_result.items == [EXPECTED]

@@ -1,4 +1,5 @@
 import typing
+import itertools
 
 from . import response_pb2
 from .. import driver
@@ -67,8 +68,13 @@ class Mangaplus(driver.Driver):
         if title_detail.title.name is not None:
             feed_data.set_title(str(title_detail.title.name))
 
+        chapters = title_detail.chapters
+        chapter_list = itertools.chain(
+            reversed(chapters.last_chapter_list),
+            reversed(chapters.first_chapter_list),
+        )
         new_items = []
-        for item in reversed(title_detail.chapters.last_chapter_list):
+        for item in chapter_list:
             if item.sub_title == feed_data.get_cursor():
                 break
             new_items.append(driver.ParsingItem(

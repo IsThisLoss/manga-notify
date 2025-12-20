@@ -144,3 +144,5 @@ data
 redis-data
 pg-data
 volumes
+
+*.DS_Store
