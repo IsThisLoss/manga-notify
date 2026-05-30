@@ -76,7 +76,8 @@ UPDATE
   feeds
 SET
   cursor = :cursor,
-  title = :title
+  title = :title,
+  updated_at = NOW()
 WHERE
   id = :id;
 
@@ -85,6 +86,7 @@ WHERE
 UPDATE
   feeds
 SET
-  mal_url = :mal_url
+  mal_url = :mal_url,
+  updated_at = NOW()
 WHERE
   id = :id;

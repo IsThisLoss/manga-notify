@@ -7,16 +7,16 @@ run-jobs:
 	python -m manga_notify jobs
 
 run-docker:
-	docker-compose up -d --build
+	docker compose up -d --build
 
 stop-docker:
-	docker-compose down
+	docker compose down
 
 start-dev-env:
-	docker-compose up -d postgres redis
+	docker compose up -d postgres redis
 
 down-dev-env:
-	docker-compose down
+	docker compose down
 
 mypy-check:
 	python -m mypy manga_notify tests

@@ -1,15 +1,21 @@
-import typing
 import itertools
+import logging
+import typing
+import uuid
 
 from . import response_pb2
 from .. import driver
 from ... import dependencies
 from ...database import feed_storage
 
+from google.protobuf import json_format
+
+
+logger = logging.getLogger(__name__)
 
 UA = (
-    'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:93.0) '
-    'Gecko/20100101 Firefox/111.0'
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:151.0)'
+    'Gecko/20100101 Firefox/151.0'
 )
 
 
@@ -50,6 +56,7 @@ class Mangaplus(driver.Driver):
     ) -> driver.ParsingResult:
         headers = {
             'User-Agent': UA,
+            'SESSION-TOKEN': str(uuid.uuid4()),
         }
 
         url = self._get_url(feed_data)
@@ -63,6 +70,7 @@ class Mangaplus(driver.Driver):
             raw_data = await response.read()
 
         data = response_pb2.Response.FromString(raw_data)
+        logger.info('Got mangaplus response: %s', json_format.MessageToJson(data, indent=2))
 
         title_detail = data.success_result.title_detail
         if title_detail.title.name is not None:
