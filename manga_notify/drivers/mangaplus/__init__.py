@@ -70,7 +70,10 @@ class Mangaplus(driver.Driver):
             raw_data = await response.read()
 
         data = response_pb2.Response.FromString(raw_data)
-        logger.info('Got mangaplus response: %s', json_format.MessageToJson(data, indent=2))
+        logger.debug(
+            'Got mangaplus response: %s',
+            json_format.MessageToJson(data, indent=2),
+        )
 
         title_detail = data.success_result.title_detail
         if title_detail.title.name is not None:
