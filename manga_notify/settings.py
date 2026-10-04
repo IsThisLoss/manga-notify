@@ -39,8 +39,7 @@ class Settings(pydantic_settings.BaseSettings):
     # Base URL for webhook will be used to generate webhook URL for Telegram,
     base_webhook_url: str = "https://localhost/"
 
-    class Config:
-        env_file = '.env'
+    model_config = pydantic_settings.SettingsConfigDict(env_file='.env')
 
 
 @lru_cache()

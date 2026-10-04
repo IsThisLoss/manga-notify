@@ -1,4 +1,4 @@
--- name: get_add
+-- name: get_add()
 -- Fetch all feeds from database
 SELECT
   id,
@@ -10,7 +10,7 @@ SELECT
 FROM
   feeds;
 
--- name: get^
+-- name: get(id)^
 -- Fetch feed by id
 SELECT
   id,
@@ -25,7 +25,7 @@ WHERE
   id = :id
 LIMIT 1;
 
--- name: find^
+-- name: find(driver, url)^
 -- Find feed by driver and url
 SELECT
   id,
@@ -42,7 +42,7 @@ WHERE
   url = :url
 LIMIT 1;
 
--- name: insert<!
+-- name: insert(driver, url)<!
 -- Inserts new feed
 INSERT INTO feeds(
   driver,
@@ -53,7 +53,7 @@ INSERT INTO feeds(
 )
 RETURNING id
 
--- name: find_without_mal_link
+-- name: find_without_mal_link(limit)
 -- Finds feeds with mal_url IS NULL
 SELECT
   id,
@@ -70,7 +70,7 @@ WHERE
   mal_url IS NULL
 LIMIT :limit;
 
--- name: update!
+-- name: update(cursor, title, id)!
 -- Updates cursor and title
 UPDATE
   feeds
@@ -81,7 +81,7 @@ SET
 WHERE
   id = :id;
 
--- name: update_mal_url!
+-- name: update_mal_url(mal_url, id)!
 -- Updates mal_url
 UPDATE
   feeds

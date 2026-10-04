@@ -1,8 +1,8 @@
--- name: exists^
+-- name: exists(id)$
 -- return true if given user_id exists in database
 SELECT EXISTS(SELECT id FROM users WHERE id = :id);
 
--- name: insert!
+-- name: insert(id, login)!
 -- Inserts new user in database
 INSERT INTO users (
   id,
@@ -13,7 +13,7 @@ INSERT INTO users (
 )
 ON CONFLICT (id) DO NOTHING;
 
--- name: subscribe!
+-- name: subscribe(user_id, feed_id)!
 -- Insert user_id, feed_id into subscriptions
 INSERT INTO subscriptions (
   user_id,
@@ -24,7 +24,7 @@ INSERT INTO subscriptions (
 )
 ON CONFLICT (user_id, feed_id) DO NOTHING;
 
--- name: unsubscribe!
+-- name: unsubscribe(user_id, feed_id)!
 -- Remove user_id, feed_id from subscriptions
 DELETE FROM
   subscriptions
@@ -33,7 +33,7 @@ WHERE
   AND
   feed_id = :feed_id;
 
--- name: get_subscriptions
+-- name: get_subscriptions(user_id)
 -- Returns user's subscriptions
 SELECT
   subscriptions.feed_id as feed_id
@@ -45,7 +45,7 @@ FROM
 WHERE
   users.id = :user_id;
 
--- name: get_all_subscriptions
+-- name: get_all_subscriptions()
 -- Returns all subscriptions
 SELECT
   users.id as user_id,

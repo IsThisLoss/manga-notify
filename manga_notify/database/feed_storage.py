@@ -71,11 +71,11 @@ class FeedStorage:
         self._connection = conn
 
     async def get_all(self) -> typing.List[FeedData]:
-        rows = await queries.get_add(
+        rows = queries.get_add(
             self._connection,
         )
         result = []
-        for id, driver, url, cursor, title, mal_url in rows:
+        async for id, driver, url, cursor, title, mal_url in rows:
             data = FeedData(
                 id=id,
                 driver=driver,
@@ -140,12 +140,12 @@ class FeedStorage:
         self,
         limit: int = 10,
     ) -> typing.List[FeedData]:
-        rows = await queries.find_without_mal_link(
+        rows = queries.find_without_mal_link(
             self._connection,
             limit=limit,
         )
         result = []
-        for id, driver, url, cursor, title, mal_url in rows:
+        async for id, driver, url, cursor, title, mal_url in rows:
             data = FeedData(
                 id=id,
                 driver=driver,

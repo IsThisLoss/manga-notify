@@ -74,10 +74,9 @@ class AuthCallbackMiddleware(AuthMiddleware):
         data: typing.Dict[str, typing.Any]
     ) -> typing.Any:
         deps: dependencies.Dependencies = data['deps']
-        event.message
 
         if not event.from_user:
-            if event.message:
+            if isinstance(event.message, types.Message):
                 await self.on_empty_user(event.message)
             return
 
@@ -88,7 +87,7 @@ class AuthCallbackMiddleware(AuthMiddleware):
         data['login'] = login
 
         if not await self.user_exists(deps, user_id):
-            if event.message:
+            if isinstance(event.message, types.Message):
                 await self.on_not_found_user(event.message)
             return
 

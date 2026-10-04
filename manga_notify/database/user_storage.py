@@ -66,12 +66,12 @@ class UserStorage:
         )
 
     async def get_subscriptions(self, user_id: str) -> UserInfo:
-        rows = await queries.get_subscriptions(
+        rows = queries.get_subscriptions(
             self._connection,
             user_id=user_id,
         )
         feed_ids = set()
-        for feed_id in rows:
+        async for feed_id in rows:
             feed_ids.add(int(feed_id[0]))
         return UserInfo(
             user_id=user_id,
@@ -79,11 +79,11 @@ class UserStorage:
         )
 
     async def get_all(self) -> typing.List[UserInfo]:
-        rows = await queries.get_all_subscriptions(
+        rows = queries.get_all_subscriptions(
             self._connection,
         )
         user_to_subscription = collections.defaultdict(set)
-        for user_id, feed_id in rows:
+        async for user_id, feed_id in rows:
             user_to_subscription[user_id].add(int(feed_id))
 
         result = []

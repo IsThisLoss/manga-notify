@@ -28,4 +28,4 @@ tests:
 	. ./tests/init_env.sh && python -m pytest tests
 
 up-requirements:
-	pip-compile --output-file=requirements.txt pyproject.toml
+	pip-compile --strip-extras --output-file=requirements.txt pyproject.toml
