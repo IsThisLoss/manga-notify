@@ -1,29 +1,48 @@
-version: "3.1"
-
 services:
   manga-notify:
-    image: ghcr.io/isthisloss/manga-notify:latest    
-    network_mode: host
+    image: ghcr.io/isthisloss/manga-notify:${TAG:?TAG is required}
+    env_file: .env
     environment:
-      TG_TOKEN: "${TG_TOKEN}"
-      PARSING_INTERVAL: "${PARSING_INTERVAL:-15}"
+      PG_CONN: postgresql://manga_notify:${POSTGRES_PASSWORD}@postgres:5432/manga_notify
+      REDIS_HOST: redis
+      WEB_SERVER_HOST: 0.0.0.0
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./supervisord.conf:/etc/supervisor/supervisord.conf:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   redis:
-    image: redis:alpine
-    network_mode: host
-    restart: always
+    image: redis:7-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    command: ["sh", "-c", 'exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"']
     volumes:
       - ./volumes/redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
 
   postgres:
     image: postgres:14
-    network_mode: host
-    restart: always
     environment:
       POSTGRES_USER: manga_notify
       POSTGRES_DB: manga_notify
-      POSTGRES_PASSWORD: manga_notify
-      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     volumes:
-      - ./volumes/postgres:/var/lib/postgresql/data/pgdata
+      - ./volumes/postgres:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U manga_notify -d manga_notify"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped

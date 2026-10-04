@@ -8,10 +8,22 @@ Simple python bot, that notifies about new manga chapters through Telegram.
 
 To setup your own instance of this application
 
-- Install docker and docker-compose
-- Take docker compose form [docker-compose.yaml](docs/deploy/docker-compose.yaml)
-- Put your Bot's token as environment variables `TG_TOKEN` (probably .env file)
-- Run `docker-compose up -d`
+- Install Docker with the Compose plugin.
+- Copy the files from [docs/deploy](docs/deploy) into the deployment directory,
+  including `migrations/` and `supervisord.conf`.
+- Copy `.env.example` to `.env`, set the Telegram token, release `TAG`, random
+  passwords and webhook URL/secret. Keep `.env` private (`chmod 600 .env`).
+- Configure an HTTPS reverse proxy to `127.0.0.1:8080` for the webhook path.
+- Run `docker compose up -d --wait`.
+
+Postgres and Redis run in the same Compose project, with data under `./volumes/`.
+The SQL files initialize the schema only when Postgres starts with an empty data
+folder; later schema changes require explicit migrations.
+
+Production runs in `/home/manga-notify/app` on `sakura.isthisloss.ru`, under the
+`manga-notify` user. GitHub tag releases copy deployment configuration and run
+`deploy.sh` there. The `yc-deploy` GitHub environment stores the SSH `KEY`.
+The webhook is `https://sakura.isthisloss.ru/webhook/sakura`.
 
 ## Development
 

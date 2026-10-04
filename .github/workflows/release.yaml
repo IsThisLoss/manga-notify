@@ -7,6 +7,10 @@ on:
 env:
   REGISTRY: ghcr.io
 
+concurrency:
+  group: manga-notify-production
+  cancel-in-progress: false
+
 jobs:
   deployment:
     environment: yc-deploy
@@ -38,11 +42,25 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
 
-      - name: Deploy image
-        uses: appleboy/ssh-action@master
+      - name: Copy deployment configuration
+        uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
+          host: sakura.isthisloss.ru
+          username: manga-notify
           key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
-          script: TAG=${{ github.ref_name }} ./deploy.sh manga-notify
+          port: 22
+          source: "docs/deploy/*"
+          target: /home/manga-notify/app
+          strip_components: 2
+
+      - name: Deploy image
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: sakura.isthisloss.ru
+          username: manga-notify
+          key: ${{ secrets.KEY }}
+          port: 22
+          envs: TAG
+          script: bash /home/manga-notify/app/deploy.sh
+        env:
+          TAG: ${{ github.ref_name }}
