@@ -10,6 +10,12 @@ services:
       - "127.0.0.1:8080:8080"
     volumes:
       - ./supervisord.conf:/etc/supervisor/supervisord.conf:ro
+    healthcheck:
+      test: ["CMD", "supervisorctl", "-c", "/etc/supervisor/supervisord.conf", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
     depends_on:
       redis:
         condition: service_healthy
