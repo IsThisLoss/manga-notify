@@ -38,13 +38,13 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres:14
+    image: postgres:18
     environment:
       POSTGRES_USER: manga_notify
       POSTGRES_DB: manga_notify
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     volumes:
-      - ./volumes/postgres:/var/lib/postgresql/data
+      - ./volumes/postgres18:/var/lib/postgresql
       - ./migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U manga_notify -d manga_notify"]
