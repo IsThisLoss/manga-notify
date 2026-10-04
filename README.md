@@ -15,6 +15,8 @@ To setup your own instance of this application
 
 ## Development
 
+Python 3.10 or newer is required.
+
 To setup development environment use standart flow for venv
 
 ```bash

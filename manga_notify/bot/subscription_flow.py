@@ -37,7 +37,7 @@ async def subscriptions_handler(
         msg = f'Активные подписки:\n{data_str}'
     await message.reply(
         msg,
-        enums.ParseMode.MARKDOWN,
+        parse_mode=enums.ParseMode.MARKDOWN,
         disable_web_page_preview=True,
     )
 
@@ -138,7 +138,7 @@ async def unsubscribe_callback(
     )
     if is_unsubscribed:
         msg = 'Вы успешно отписаны'
-    if callback_query.message:
+    if isinstance(callback_query.message, types.Message):
         await callback_query.message.edit_text(
             msg,
             reply_markup=types.InlineKeyboardMarkup(inline_keyboard=[]),
