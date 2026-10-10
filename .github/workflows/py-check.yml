@@ -12,30 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Read Python version from Dockerfile
-        id: docker-python
-        run: |
-          python3 - <<'PYTHON'
-          import os
-          from pathlib import Path
-          import re
-
-          dockerfile = Path("Dockerfile").read_text()
-          match = re.search(
-              r"^FROM\s+python:(\d+\.\d+(?:\.\d+)?)(?=[-@\s]|$)",
-              dockerfile,
-              re.MULTILINE,
-          )
-          if match is None:
-              raise SystemExit("No Python version found in Dockerfile")
-          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write(f"python-version={match.group(1)}\n")
-          PYTHON
-
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ steps.docker-python.outputs.python-version }}
+          python-version: "3.11"
 
       - name: Install deps
         run: |
