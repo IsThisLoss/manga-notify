@@ -20,6 +20,8 @@ class Settings(pydantic_settings.BaseSettings):
     # keys used by aiogram fsm
     aiogram_fsm_prefix: 'str' = 'aiogram_fsm'
 
+    reminder_timezone: str = 'Europe/Moscow'
+
     parsing_interval: int  # interval in minutes to run background parsing
 
     # Token to access erai-raws

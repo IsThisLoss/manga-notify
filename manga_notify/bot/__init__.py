@@ -7,7 +7,7 @@ from aiohttp import web
 import aiogram
 import asyncio
 
-from . import basic_commands, subscription_flow, mal_search_flow
+from . import basic_commands, subscription_flow, mal_search_flow, remind_later
 from .. import dependencies
 
 
@@ -21,6 +21,7 @@ async def _make_dispatcher(deps: dependencies.Dependencies) -> Dispatcher:
         basic_commands.router,
         subscription_flow.router,
         mal_search_flow.router,
+        remind_later.router,
     )
     return dp
 
