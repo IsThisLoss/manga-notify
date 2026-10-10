@@ -1,26 +1,29 @@
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+import logging
 import typing
 
 from aiogram import types
 
 from . import callback_data
+from .router import make_router
 from .. import dependencies
 
 
 # NOTE: Telegram API has max size of callback data
 # It is 64 bytes, so use sortcuts
-_TOMORROW_MOGRIN = 'TM'
+_TOMORROW_MORNING = 'TM'
 _TOMORROW_EVENING = 'TE'
 _SATURDAY_MORNING = 'SM'
 
 
 def build_remind_keyboard() -> types.InlineKeyboardMarkup:
     keys = []
-    method = callback_data.Methods.LATER
+    method = callback_data.Methods.LATER_TIME
     buttons = (
-        ('Завтра утром', _TOMORROW_MOGRIN),
-        ('Завтра вечером', _TOMORROW_EVENING),
-        ('В субботу утром', _SATURDAY_MORNING),
+        ('Завтра в 09:00', _TOMORROW_MORNING),
+        ('Завтра в 21:00', _TOMORROW_EVENING),
+        ('В субботу в 09:00', _SATURDAY_MORNING),
     )
     for text, when in buttons:
         keys.append(
@@ -48,15 +51,16 @@ def find_next_saturday(now: datetime) -> datetime:
 
 
 def _get_queue_time(now: datetime, when: str) -> typing.Optional[datetime]:
-    if when == _TOMORROW_MOGRIN:
+    if when == _TOMORROW_MORNING:
         result = now + timedelta(days=1)
-        return result.replace(hour=9, minute=0)
+        return result.replace(hour=9, minute=0, second=0, microsecond=0)
     if when == _TOMORROW_EVENING:
         result = now + timedelta(days=1)
-        return result.replace(hour=21, minute=0)
+        return result.replace(hour=21, minute=0, second=0, microsecond=0)
     if when == _SATURDAY_MORNING:
-        result = find_next_saturday(now).replace(hour=9, minute=0)
-        return result
+        return find_next_saturday(now).replace(
+            hour=9, minute=0, second=0, microsecond=0,
+        )
     return None
 
 
@@ -66,8 +70,8 @@ async def button_callback(
     message_id: int,
     data: callback_data.CallbackData,
 ):
-    now = datetime.now()
-    until = _get_queue_time(now, data.payload['when'])
+    now = datetime.now(ZoneInfo(deps.get_cfg().reminder_timezone))
+    until = _get_queue_time(now, data.payload.get('when', ''))
     if not until:
         return False
     queues = await deps.get_queues()
@@ -76,5 +80,66 @@ async def button_callback(
         user_id,
         message_id,
         _defer_until=until,
+        _job_id=f'remind:{user_id}:{message_id}:{until.isoformat()}',
     )
     return True
+
+
+router = make_router(__name__)
+
+
+@router.callback_query(
+    callback_data.create_matcher(callback_data.Methods.LATER),
+)
+async def show_times(
+    query: types.CallbackQuery, deps: dependencies.Dependencies,
+):
+    if not isinstance(query.message, types.Message):
+        await query.answer('Сообщение недоступно', show_alert=True)
+        return
+    keyboard = build_remind_keyboard()
+    if query.message.reply_markup:
+        for row in query.message.reply_markup.inline_keyboard:
+            links = [button for button in row if button.url]
+            if links:
+                keyboard.inline_keyboard.append(links)
+    await query.message.edit_reply_markup(reply_markup=keyboard)
+    timezone = deps.get_cfg().reminder_timezone
+    await query.answer(f'Время напоминания: {timezone}', show_alert=True)
+
+
+@router.callback_query(
+    callback_data.create_matcher(callback_data.Methods.LATER_TIME),
+)
+async def schedule_reminder(
+    query: types.CallbackQuery,
+    deps: dependencies.Dependencies,
+    user_id: str,
+):
+    data = callback_data.parse(query.data or '')
+    if not data or not isinstance(query.message, types.Message):
+        await query.answer('Сообщение недоступно', show_alert=True)
+        return
+    try:
+        scheduled = await button_callback(
+            deps, user_id, query.message.message_id, data,
+        )
+    except Exception:
+        logging.exception('Failed to schedule reminder')
+        await query.answer('Не удалось создать напоминание. Попробуй еще раз',
+                           show_alert=True)
+        return
+    if not scheduled:
+        await query.answer('Неизвестное время напоминания', show_alert=True)
+        return
+    rows = []
+    if query.message.reply_markup:
+        for row in query.message.reply_markup.inline_keyboard:
+            links = [button for button in row if button.url]
+            if links:
+                rows.append(links)
+    keyboard = (
+        types.InlineKeyboardMarkup(inline_keyboard=rows) if rows else None
+    )
+    await query.message.edit_reply_markup(reply_markup=keyboard)
+    await query.answer('Напоминание установлено')

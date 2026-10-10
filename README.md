@@ -67,3 +67,13 @@ make flake8-check
 make mypy-check
 make tests
 ```
+
+## Reminders
+
+Release notifications have a “Напомнить позже” button. Choose tomorrow at
+09:00, tomorrow at 21:00, or next Saturday at 09:00. Saturday selected on a
+Saturday means the following week. Times use `REMINDER_TIMEZONE` (default:
+`Europe/Moscow`), independently of the server timezone. The bot confirms when
+it has scheduled a reminder and removes the time selection buttons, preserving
+the MyAnimeList link. The background worker must be running to deliver reminders. Reminders reply
+to the release notification, or arrive separately if it has been deleted.
