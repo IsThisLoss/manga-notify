@@ -1,5 +1,6 @@
 import typing
 
+from ..i18n import gettext as _
 from ..drivers import driver
 from ..channels import channel
 
@@ -17,13 +18,15 @@ class FeedMessage(channel.Message):
         self._mal_url = mal_url
 
     def _serialize_one(self, parsed_item: driver.ParsingItem) -> str:
-        return f'Новый выпуск [{parsed_item.name}]({parsed_item.link})'
+        return _('New release [{name}]({link})').format(
+            name=parsed_item.name, link=parsed_item.link,
+        )
 
     def _serialize_many(
         self,
         parsed_items: typing.List[driver.ParsingItem],
     ) -> str:
-        result = 'Несколько новых выпусков:\n'
+        result = _('Several new releases:\n')
         for parsed_item in parsed_items:
             result += f'[{parsed_item.name}]({parsed_item.link})\n'
         return result

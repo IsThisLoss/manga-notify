@@ -77,3 +77,25 @@ Saturday means the following week. Times use `REMINDER_TIMEZONE` (default:
 it has scheduled a reminder and removes the time selection buttons, preserving
 the MyAnimeList link. The background worker must be running to deliver reminders. Reminders reply
 to the release notification, or arrive separately if it has been deleted.
+
+## Translations
+
+User-facing messages use aiogram's `I18n`/gettext engine in
+`manga_notify/i18n.py`. English message templates are marked with `_()`; Russian
+translations live in `manga_notify/locales/ru/LC_MESSAGES/messages.po`.
+The bot uses `ConstI18nMiddleware` with Russian as the default language, keeping
+command replies, authentication messages, release notifications and reminders
+consistent. Workers use the same engine without requiring a Telegram update.
+
+When changing messages:
+
+```bash
+make locales-update
+# Edit the Russian .po file and resolve any fuzzy entries.
+make locales-compile
+```
+
+Commit the `.pot`, `.po` and compiled `.mo` files together. Catalogs are included
+in the Python package and Docker image, so production does not need to compile
+them at startup. Use literal templates such as `_("Hello, {name}").format(...)`;
+format variables after translation rather than passing f-strings to `_()`.

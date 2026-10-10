@@ -17,7 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-  "aiogram==3.31.0",
+  "aiogram[i18n]==3.31.0",
   # aioresponses 0.7.9 is incompatible with aiohttp 3.14 ClientResponse.
   "aiohttp==3.13.5",
   "aiosql==15.0",
@@ -52,7 +52,8 @@ dev = [
 [tool.hatch.build]
 include = [
   "manga_notify/**/*.py",
-  "manga_notify/**/*.sql"
+  "manga_notify/**/*.sql",
+  "manga_notify/locales/**"
 ]
 
 [tool.pytest.ini_options]

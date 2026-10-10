@@ -4,6 +4,7 @@ from aiogram import types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
+from ..i18n import gettext as _
 from . import mal_search
 from .router import make_router
 
@@ -21,7 +22,7 @@ async def mal_handler(message: types.Message, state: FSMContext):
 
     if not args:
         await state.set_state(MalSearch.query)
-        await message.reply('Введи название тайтла')
+        await message.reply(_('Enter a title name'))
         return
 
     searcher = mal_search.MalSearch()

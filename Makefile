@@ -29,3 +29,14 @@ tests:
 
 up-requirements:
 	pip-compile --strip-extras --output-file=requirements.txt pyproject.toml
+
+.PHONY: locales-extract locales-update locales-compile
+
+locales-extract:
+	pybabel extract --input-dirs=manga_notify -o manga_notify/locales/messages.pot --project=manga-notify
+
+locales-update: locales-extract
+	pybabel update -d manga_notify/locales -D messages -i manga_notify/locales/messages.pot
+
+locales-compile:
+	pybabel compile -d manga_notify/locales -D messages

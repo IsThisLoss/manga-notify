@@ -2,12 +2,12 @@ import asyncio
 import logging
 import typing
 
+from ..i18n import gettext as _
 from ..external import mal
 
 
 class MalSearchResponseBuilder:
     def __init__(self):
-        self._msg = 'Ничего не нашлось'
         self._anime = []
         self._manga = []
 
@@ -19,15 +19,15 @@ class MalSearchResponseBuilder:
 
     def serialize(self) -> str:
         if not self._anime and not self._manga:
-            return 'Ничего не нашлось'
-        result = 'Нашлось:\n'
+            return _('Nothing found')
+        result = _('Found:\n')
         if self._manga:
-            result += 'Манга:\n'
+            result += _('Manga:\n')
             result += '\n'.join(self._manga)
         if self._anime:
             if self._manga:
                 result += '\n'
-            result += 'Аниме:\n'
+            result += _('Anime:\n')
             result += '\n'.join(self._anime)
         return result
 
@@ -70,9 +70,9 @@ class MalSearch:
     ) -> str:
         try:
             return await self._search_impl(text, feed_types, limit)
-        except Exception as _:  # noqa
+        except Exception:
             logging.exception('Mal error')
-        return 'Похоже mal не работает'
+        return _('MyAnimeList seems to be unavailable')
 
     async def _search_impl(
         self,

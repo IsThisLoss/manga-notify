@@ -1,6 +1,7 @@
 from aiogram import enums
 from aiogram import types
 
+from ..i18n import gettext as _
 from ..bot import callback_data
 
 from .. import dependencies
@@ -25,7 +26,7 @@ async def job(ctx, user_id: str, message: str, extra: dict):
 
     keyboard = types.InlineKeyboardMarkup(inline_keyboard=[[
         types.InlineKeyboardButton(
-            text='Напомнить позже',
+            text=_('Remind me later'),
             callback_data=callback_data.CallbackData(
                 method=callback_data.Methods.LATER, payload={},
             ).serialize(),

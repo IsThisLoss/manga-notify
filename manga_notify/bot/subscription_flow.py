@@ -4,6 +4,7 @@ from aiogram import types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
+from ..i18n import gettext as _
 from . import callback_data
 from . import info_builder
 from .. import dependencies
@@ -31,10 +32,10 @@ async def subscriptions_handler(
     data = []
     for feed in feeds:
         data.append(info_builder.build_feed_info(feed))
-    msg = 'Нет активных подписок'
+    msg = _('No active subscriptions')
     if data:
         data_str = '\n'.join(data)
-        msg = f'Активные подписки:\n{data_str}'
+        msg = _('Active subscriptions:\n{feeds}').format(feeds=data_str)
     await message.reply(
         msg,
         parse_mode=enums.ParseMode.MARKDOWN,
@@ -45,7 +46,7 @@ async def subscriptions_handler(
 @router.message(filters.Command('subscribe'))
 async def subscribe_handler(message: types.Message, state: FSMContext):
     await state.set_state(NewSubscription.url)
-    await message.reply('Введи ссылку на фид')
+    await message.reply(_('Enter a feed URL'))
 
 
 @router.message(filters.StateFilter(NewSubscription.url))
@@ -61,7 +62,7 @@ async def url_state(
     await state.clear()
 
     if not driver:
-        await message.reply('Кажется, я еще не умею обрабатывать такие ссылки')
+        await message.reply(_('This URL is not supported yet'))
         return
 
     db = await deps.get_db()
@@ -72,9 +73,9 @@ async def url_state(
         url,
     )
     if is_subscribed:
-        await message.reply('Вы успешно подписаны')
+        await message.reply(_('You have subscribed successfully'))
         return
-    await message.reply('Не удалось создать фид')
+    await message.reply(_('Could not create the feed'))
 
 
 @router.message(filters.Command('unsubscribe'))
@@ -89,7 +90,7 @@ async def unsubscribe_hander(
     feeds = await user_subscription.get_user_feeds(chat_id)
 
     if not feeds:
-        await message.reply('Нет активных подписок')
+        await message.reply(_('No active subscriptions'))
         return
 
     buttons = []
@@ -107,7 +108,7 @@ async def unsubscribe_hander(
         ])
     keyboard_markup = types.InlineKeyboardMarkup(inline_keyboard=buttons)
     await message.reply(
-        'Выбери фид от которого нужно отписаться',
+        _('Choose a feed to unsubscribe from'),
         reply_markup=keyboard_markup
     )
 
@@ -122,14 +123,14 @@ async def unsubscribe_callback(
 ):
     data = callback_data.parse(callback_query.data)
     if not data:
-        await callback_query.answer('Что-то пошло не так')
+        await callback_query.answer(_('Something went wrong'))
         return
 
     feed_id = data.payload['id']
-    await callback_query.answer('Готово')
+    await callback_query.answer(_('Done'))
     user_id = str(callback_query.from_user.id)
 
-    msg = 'Не удалось найти фид'
+    msg = _('Could not find the feed')
     db = await deps.get_db()
     user_subscription = subscription.UserSubscription(db)
     is_unsubscribed = await user_subscription.unsubscribe(
@@ -137,10 +138,10 @@ async def unsubscribe_callback(
         feed_id,
     )
     if is_unsubscribed:
-        msg = 'Вы успешно отписаны'
+        msg = _('You have unsubscribed successfully')
     if isinstance(callback_query.message, types.Message):
         await callback_query.message.edit_text(
             msg,
             reply_markup=types.InlineKeyboardMarkup(inline_keyboard=[]),
         )
-    await callback_query.answer('Готово')
+    await callback_query.answer(_('Done'))

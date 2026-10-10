@@ -1,8 +1,8 @@
-
 from aiogram import filters
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 
+from ..i18n import gettext as _
 from .. import dependencies
 from .router import make_router
 
@@ -21,9 +21,9 @@ async def start_handler(
     res = await db.users.register(user_id, login)
 
     if res is True:
-        await message.reply('Вы успешно зарегистрированы!')
+        await message.reply(_('You have been registered!'))
     else:
-        await message.reply('Произошла ошибка при регистрации')
+        await message.reply(_('Registration failed'))
 
 
 @router.message(filters.Command('cancel'))
@@ -32,19 +32,18 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     if current_state is None:
         return
     await state.clear()
-    await message.reply('Отменено')
+    await message.reply(_('Cancelled'))
 
 
 @router.message(filters.Command('help'))
 async def help_handler(message: types.Message):
-    msg = (
-        '/help - выводит это сообщение\n'
-        '/start - регистрирует пользователя\n'
-        '/subscribe - подписывает пользователя на обновления\n'
-        '/subscriptions - возвращает список активных подписок\n'
-        '/unsubscribe - отписывает пользователя от обновлений\n'
-        '/mal - поиск тайтлов MyAnimeList '
-        '(или /mal [manga|anime] *название*)\n'
+    msg = _(
+        '/help - show this message\n'
+        '/start - register a user\n'
+        '/subscribe - subscribe to updates\n'
+        '/subscriptions - list active subscriptions\n'
+        '/unsubscribe - unsubscribe from updates\n'
+        '/mal - search MyAnimeList titles (or /mal [manga|anime] *title*)\n'
     )
     msg = msg.strip()
     await message.reply(msg)

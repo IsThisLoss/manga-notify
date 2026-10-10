@@ -5,6 +5,7 @@ import typing
 
 from aiogram import types
 
+from ..i18n import gettext as _
 from . import callback_data
 from .router import make_router
 from .. import dependencies
@@ -21,9 +22,9 @@ def build_remind_keyboard() -> types.InlineKeyboardMarkup:
     keys = []
     method = callback_data.Methods.LATER_TIME
     buttons = (
-        ('Завтра в 09:00', _TOMORROW_MORNING),
-        ('Завтра в 21:00', _TOMORROW_EVENING),
-        ('В субботу в 09:00', _SATURDAY_MORNING),
+        (_('Tomorrow at 09:00'), _TOMORROW_MORNING),
+        (_('Tomorrow at 21:00'), _TOMORROW_EVENING),
+        (_('Saturday at 09:00'), _SATURDAY_MORNING),
     )
     for text, when in buttons:
         keys.append(
@@ -95,7 +96,7 @@ async def show_times(
     query: types.CallbackQuery, deps: dependencies.Dependencies,
 ):
     if not isinstance(query.message, types.Message):
-        await query.answer('Сообщение недоступно', show_alert=True)
+        await query.answer(_('Message unavailable'), show_alert=True)
         return
     keyboard = build_remind_keyboard()
     if query.message.reply_markup:
@@ -105,7 +106,10 @@ async def show_times(
                 keyboard.inline_keyboard.append(links)
     await query.message.edit_reply_markup(reply_markup=keyboard)
     timezone = deps.get_cfg().reminder_timezone
-    await query.answer(f'Время напоминания: {timezone}', show_alert=True)
+    await query.answer(
+        _('Reminder timezone: {timezone}').format(timezone=timezone),
+        show_alert=True,
+    )
 
 
 @router.callback_query(
@@ -118,7 +122,7 @@ async def schedule_reminder(
 ):
     data = callback_data.parse(query.data or '')
     if not data or not isinstance(query.message, types.Message):
-        await query.answer('Сообщение недоступно', show_alert=True)
+        await query.answer(_('Message unavailable'), show_alert=True)
         return
     try:
         scheduled = await button_callback(
@@ -126,11 +130,11 @@ async def schedule_reminder(
         )
     except Exception:
         logging.exception('Failed to schedule reminder')
-        await query.answer('Не удалось создать напоминание. Попробуй еще раз',
+        await query.answer(_('Could not schedule the reminder. Try again'),
                            show_alert=True)
         return
     if not scheduled:
-        await query.answer('Неизвестное время напоминания', show_alert=True)
+        await query.answer(_('Unknown reminder time'), show_alert=True)
         return
     rows = []
     if query.message.reply_markup:
@@ -142,4 +146,4 @@ async def schedule_reminder(
         types.InlineKeyboardMarkup(inline_keyboard=rows) if rows else None
     )
     await query.message.edit_reply_markup(reply_markup=keyboard)
-    await query.answer('Напоминание установлено')
+    await query.answer(_('Reminder scheduled'))

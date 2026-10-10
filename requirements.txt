@@ -26,6 +26,8 @@ asyncpg==0.31.0
     # via manga-notify (pyproject.toml)
 attrs==26.1.0
     # via aiohttp
+babel==2.18.0
+    # via aiogram
 beautifulsoup4==4.15.0
     # via manga-notify (pyproject.toml)
 certifi==2026.7.22

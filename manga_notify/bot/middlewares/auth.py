@@ -6,16 +6,17 @@ import typing
 from aiogram import BaseMiddleware
 from aiogram import types
 
+from ...i18n import gettext as _
 from ... import dependencies
 
 
 class AuthMiddleware(BaseMiddleware):
     async def on_empty_user(self, message: types.Message):
-        await message.reply('Я умею работать только с пользователями')
+        await message.reply(_('I can only work with users'))
 
     async def on_not_found_user(self, message: types.Message):
         await message.reply(
-            'Прежде чем использовать бота нужно вызвать /start'
+            _('Use /start before using the bot')
         )
 
     async def user_exists(

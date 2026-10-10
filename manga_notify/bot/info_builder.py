@@ -1,10 +1,12 @@
+from ..i18n import gettext as _
+
 from ..database import feed_storage
 
 
 def build_feed_info(feed: feed_storage.FeedData) -> str:
     result = ''
 
-    title = feed.get_title() or 'Неизвестный тайтол'
+    title = feed.get_title() or _('Unknown title')
     result += f'{title}:\n'
     result += f'- `{feed.get_url()}`'
 

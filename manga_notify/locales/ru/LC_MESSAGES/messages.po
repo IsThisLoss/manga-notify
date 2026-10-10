@@ -1,0 +1,186 @@
+# Russian translations for manga-notify.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the manga-notify
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: manga-notify VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-10-10 17:29+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: manga_notify/bot/basic_commands.py:24
+msgid "You have been registered!"
+msgstr "Вы успешно зарегистрированы!"
+
+#: manga_notify/bot/basic_commands.py:26
+msgid "Registration failed"
+msgstr "Произошла ошибка при регистрации"
+
+#: manga_notify/bot/basic_commands.py:35
+msgid "Cancelled"
+msgstr "Отменено"
+
+#: manga_notify/bot/basic_commands.py:41
+msgid ""
+"/help - show this message\n"
+"/start - register a user\n"
+"/subscribe - subscribe to updates\n"
+"/subscriptions - list active subscriptions\n"
+"/unsubscribe - unsubscribe from updates\n"
+"/mal - search MyAnimeList titles (or /mal [manga|anime] *title*)\n"
+msgstr ""
+"/help - выводит это сообщение\n"
+"/start - регистрирует пользователя\n"
+"/subscribe - подписывает пользователя на обновления\n"
+"/subscriptions - возвращает список активных подписок\n"
+"/unsubscribe - отписывает пользователя от обновлений\n"
+"/mal - поиск тайтлов MyAnimeList (или /mal [manga|anime] *название*)\n"
+
+#: manga_notify/bot/info_builder.py:9
+msgid "Unknown title"
+msgstr "Неизвестный тайтл"
+
+#: manga_notify/bot/mal_search.py:22
+msgid "Nothing found"
+msgstr "Ничего не нашлось"
+
+#: manga_notify/bot/mal_search.py:23
+msgid "Found:\n"
+msgstr "Нашлось:\n"
+
+#: manga_notify/bot/mal_search.py:25
+msgid "Manga:\n"
+msgstr "Манга:\n"
+
+#: manga_notify/bot/mal_search.py:30
+msgid "Anime:\n"
+msgstr "Аниме:\n"
+
+#: manga_notify/bot/mal_search.py:75
+msgid "MyAnimeList seems to be unavailable"
+msgstr "Похоже mal не работает"
+
+#: manga_notify/bot/mal_search_flow.py:25
+msgid "Enter a title name"
+msgstr "Введи название тайтла"
+
+#: manga_notify/bot/remind_later.py:25
+msgid "Tomorrow at 09:00"
+msgstr "Завтра в 09:00"
+
+#: manga_notify/bot/remind_later.py:26
+msgid "Tomorrow at 21:00"
+msgstr "Завтра в 21:00"
+
+#: manga_notify/bot/remind_later.py:27
+msgid "Saturday at 09:00"
+msgstr "В субботу в 09:00"
+
+#: manga_notify/bot/remind_later.py:99 manga_notify/bot/remind_later.py:125
+msgid "Message unavailable"
+msgstr "Сообщение недоступно"
+
+#: manga_notify/bot/remind_later.py:110
+#, python-brace-format
+msgid "Reminder timezone: {timezone}"
+msgstr "Время напоминания: {timezone}"
+
+#: manga_notify/bot/remind_later.py:133
+msgid "Could not schedule the reminder. Try again"
+msgstr "Не удалось создать напоминание. Попробуй еще раз"
+
+#: manga_notify/bot/remind_later.py:137
+msgid "Unknown reminder time"
+msgstr "Неизвестное время напоминания"
+
+#: manga_notify/bot/remind_later.py:149
+msgid "Reminder scheduled"
+msgstr "Напоминание установлено"
+
+#: manga_notify/bot/subscription_flow.py:35
+#: manga_notify/bot/subscription_flow.py:93
+msgid "No active subscriptions"
+msgstr "Нет активных подписок"
+
+#: manga_notify/bot/subscription_flow.py:38
+#, python-brace-format
+msgid ""
+"Active subscriptions:\n"
+"{feeds}"
+msgstr ""
+"Активные подписки:\n"
+"{feeds}"
+
+#: manga_notify/bot/subscription_flow.py:49
+msgid "Enter a feed URL"
+msgstr "Введи ссылку на фид"
+
+#: manga_notify/bot/subscription_flow.py:65
+msgid "This URL is not supported yet"
+msgstr "Кажется, я еще не умею обрабатывать такие ссылки"
+
+#: manga_notify/bot/subscription_flow.py:76
+msgid "You have subscribed successfully"
+msgstr "Вы успешно подписаны"
+
+#: manga_notify/bot/subscription_flow.py:78
+msgid "Could not create the feed"
+msgstr "Не удалось создать фид"
+
+#: manga_notify/bot/subscription_flow.py:111
+msgid "Choose a feed to unsubscribe from"
+msgstr "Выбери фид от которого нужно отписаться"
+
+#: manga_notify/bot/subscription_flow.py:126
+msgid "Something went wrong"
+msgstr "Что-то пошло не так"
+
+#: manga_notify/bot/subscription_flow.py:130
+#: manga_notify/bot/subscription_flow.py:147
+msgid "Done"
+msgstr "Готово"
+
+#: manga_notify/bot/subscription_flow.py:133
+msgid "Could not find the feed"
+msgstr "Не удалось найти фид"
+
+#: manga_notify/bot/subscription_flow.py:141
+msgid "You have unsubscribed successfully"
+msgstr "Вы успешно отписаны"
+
+#: manga_notify/bot/middlewares/auth.py:15
+msgid "I can only work with users"
+msgstr "Я умею работать только с пользователями"
+
+#: manga_notify/bot/middlewares/auth.py:19
+msgid "Use /start before using the bot"
+msgstr "Прежде чем использовать бота нужно вызвать /start"
+
+#: manga_notify/feed_processing/feed_message.py:21
+#, python-brace-format
+msgid "New release [{name}]({link})"
+msgstr "Новый выпуск [{name}]({link})"
+
+#: manga_notify/feed_processing/feed_message.py:29
+msgid "Several new releases:\n"
+msgstr "Несколько новых выпусков:\n"
+
+#: manga_notify/jobs/remind_later.py:12
+msgid "Reminder"
+msgstr "Напоминаю"
+
+#: manga_notify/jobs/send_telegram_message.py:29
+msgid "Remind me later"
+msgstr "Напомнить позже"
